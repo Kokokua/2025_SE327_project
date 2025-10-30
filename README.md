@@ -25,38 +25,34 @@ This project involves reengineering a web store from SE262 using a completely di
 
 ## Project Structure
 ```
-2025_SE327_project/
+term-project-production/
 ├── README.md                          # Main project documentation
 ├── .gitignore                         # Git ignore rules
+├── .github/                           # GitHub templates
+│   ├── pull_request_template.md       # PR template
+│   └── ISSUE_TEMPLATE/                # Issue templates
 │
-├── old-project/                       # SE262 original project
-│   ├── bookstore-project/
-│   │   ├── backend/                   # Express.js backend
-│   │   ├── frontend_ejs/              # EJS templates
-│   │   ├── admin-frontend/            # Admin panel
-│   │   └── public/                    # Static assets
-│   └── README.md                      # Old project documentation
-│
-├── new-project/                       # Reengineered project
-│   ├── backend/                       # NestJS backend (to be implemented)
-│   ├── frontend/                      # Vue.js 3 frontend (to be implemented)
-│   └── README.md                      # Setup instructions
+├── legacy/                            # SE262 original project (reference)
+│   ├── backend/                       # Express.js backend
+│   ├── frontend_ejs/                  # EJS templates
+│   ├── admin-frontend/                # Admin panel
+│   ├── public/                        # Static assets & images
+│   ├── sql/                           # Database schema
+│   └── docker-compose.yml             # Docker setup
 │
 ├── docs/                              # Project documentation
-│   ├── technology-survey.md           # ✅ Complete technology comparison
+│   ├── technology-survey.md           # ✅ Technology comparison
 │   ├── comparison-tables.md           # ✅ Quick reference tables
 │   ├── implementation-notes.md        # Implementation tracking
 │   └── final-report.pdf               # Final report (to be added)
 │
-├── presentation/                      # Presentation materials
-│   ├── slides.pdf                     # Presentation slides (to be added)
-│   └── demo-video.mp4                 # Demo video (optional)
-│
-└── bookstore-project/                 # ⚠️ To be moved to old-project/
-    └── (Original project files)
+└── sonar-project.properties           # SonarQube configuration
 ```
 
-**Note:** The `bookstore-project` folder should be moved into `old-project/` but encountered file lock issues. Will be reorganized in next session.
+**Development Branches:**
+- `backend` - NestJS backend development
+- `frontend` - Vue.js 3 frontend development
+- `chore/ci` - CI/CD configurations
 
 ## Progress Tracking
 
@@ -115,18 +111,20 @@ This project involves reengineering a web store from SE262 using a completely di
 
 ## Quick Start
 
-### Running Old Project (SE262)
+### Running Legacy Project (SE262 - Reference Only)
 ```bash
-cd old-project/bookstore-project/backend
+cd legacy/backend
 npm install
-# Setup MySQL database and .env file (see old-project/README.md)
+# Setup MySQL database and .env file
 node server.js
 ```
 
-See [old-project/README.md](old-project/README.md) for detailed setup instructions.
+See [legacy/README.md](legacy/README.md) for detailed setup instructions (if available).
 
-### Running New Project (Coming Soon)
-Will be updated after implementation. See [new-project/README.md](new-project/README.md) for planned architecture.
+### Running New Project (In Development)
+Development is in progress on separate branches:
+- **Backend:** `git checkout backend` → See `backend/README.md`
+- **Frontend:** `git checkout frontend` → See `frontend/README.md` (coming soon)
 
 ## Documentation
 
@@ -134,8 +132,7 @@ Will be updated after implementation. See [new-project/README.md](new-project/RE
 - 📘 **[Technology Survey](docs/technology-survey.md)** - Comprehensive comparison of all technology options
 - 📊 **[Comparison Tables](docs/comparison-tables.md)** - Quick reference scoring tables
 - 📝 **[Implementation Notes](docs/implementation-notes.md)** - Development progress tracking
-- 📂 **[Old Project Guide](old-project/README.md)** - Original SE262 project documentation
-- 🆕 **[New Project Guide](new-project/README.md)** - Reengineered project documentation
+- 📂 **Legacy Project** - Original SE262 project (in `legacy/` folder for reference)
 
 ## Development Workflow
 

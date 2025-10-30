@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
@@ -32,6 +34,12 @@ import { JwtAuthGuard } from './common/guards';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
         configService.get('database'),
+    }),
+
+    // Static assets (serve /public at root, e.g., /images/*)
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/',
     }),
 
     // Feature modules

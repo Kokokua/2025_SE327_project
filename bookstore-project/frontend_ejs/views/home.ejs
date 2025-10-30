@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B Store</title>
+  <link rel="stylesheet" href="/home.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    /* Modal and Cart Styles */
+    #detail-image {
+      max-width: 100%;
+      height: 400px;
+      object-fit: scale-down;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tag-pill {
+      background-color: #ffe066;
+      color: #4a3800;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    #add-to-cart-btn {
+      background-color: #ffd700;
+      border-color: #ffd700;
+      color: #4a3800;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .cart-count-badge {
+      background-color: #e74c3c;
+      font-size: 0.75rem;
+      margin-left: 0.4rem;
+      vertical-align: text-top;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Include Header -->
+  <%- include('partials/header') %>
+
+    <!-- Carousel/Banner -->
+    <section id="bannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="/images/Icons/Homesell.png" class="d-block w-100" alt="Banner 1" />
+        </div>
+        <div class="carousel-item">
+          <img src="/images/Icons/Homesell2.png" class="d-block w-100" alt="Banner 2" />
+        </div>
+        <div class="carousel-item">
+          <img src="/images/Icons/Homesell3.png" class="d-block w-100" alt="Banner 3" />
+        </div>
+      </div>
+      <!-- Previous and Next buttons -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </section>
+
+    <!-- Today Deal Section -->
+    <section class="deals">
+      <h2>Today Deal <span><a href="/general?predefined=true&topic=Today%20Deals&type=discounted"
+            style="font-size: 1.2rem;">See All</a></span></h2>
+      <div class="product-list" id="homeTodayDeal"></div>
+    </section>
+
+    <!-- Best Seller Section -->
+    <section class="best-seller">
+      <h2>Best Seller <span><a href="/general?predefined=true&topic=Bestseller&type=bestseller"
+            style="font-size: 1.2rem;">See All</a></span></h2>
+      <div class="product-list" id="homeBestSeller"></div>
+    </section>
+    <div class="modal fade" id="bookDetailsModal" tabindex="-1" aria-labelledby="bookDetailsModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="bookDetailsModalLabel">Book Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-4">
+                <img id="detail-image" src="" alt="Book cover" class="img-fluid">
+              </div>
+              <div class="col-md-8">
+                <h3 id="detail-title"></h3>
+                <div class="modal-price" id="detail-price"></div>
+                <div class="tags-container mb-3">
+                  <strong>Tags:</strong>
+                  <div id="detail-tags" class="d-flex flex-wrap gap-2 mt-2"></div>
+                </div>
+                <div id="detail-description"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="add-to-cart-btn">
+              Add to Cart <i class="bi bi-cart-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Include Footer -->
+    <%- include('partials/footer') %>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+      <script src="/js/home.js"></script>
+</body>
+
+</html>

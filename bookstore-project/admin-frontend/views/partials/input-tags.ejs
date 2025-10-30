@@ -1,0 +1,129 @@
+<div class="mb-3 position-relative">
+    <label for="input-tags" class="form-label">Tags</label>
+    <textarea class="form-control" id="input-tags-<%= suffix %>"
+        placeholder="Enter tags separated by commas or new lines"
+        rows="3"><%= typeof value !== 'undefined' ? _.escape(value) : '' %></textarea>
+    <ul id="tag-suggestions-<%= suffix %>" class="list-group mt-1 dark-dropdown"></ul>
+</div>
+
+<style>
+    .dark-dropdown {
+        position: absolute;
+        z-index: 1001;
+        display: none;
+        max-height: 150px;
+        overflow-y: auto;
+        background-color: #2c2c2c;
+        border: 1px solid #555;
+        border-radius: 4px;
+        padding: 0;
+        width: 100%;
+        list-style: none;
+    }
+
+    .dark-dropdown li {
+        padding: 4px 8px;
+        cursor: pointer;
+        color: darkgrey;
+        border-bottom: 1px solid #444;
+    }
+
+    .dark-dropdown li:hover {
+        color: white;
+    }
+
+    textarea[id^="input-tags-"]{
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    textarea[id^="input-tags-"]:focus{
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    textarea[id^="input-tags-"]::placeholder{
+        color: rgba(255, 255, 255, 0.7) !important;
+        opacity: 1 !important;
+    }
+
+    textarea[id^="input-tags-"]::-webkit-input-placeholder{
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    textarea[id^="input-tags-"]::-moz-placeholder{
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    textarea[id^="input-tags-"]:-ms-input-placeholder{
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const tagInput = document.getElementById("input-tags-<%= suffix %>");
+        const suggestionsList = document.getElementById("tag-suggestions-<%= suffix %>");
+        let allTags = [];
+
+        try {
+            const res = await fetch('/api/tags');
+            const data = await res.json();
+            allTags = data.map(tag => tag.name);
+        } catch (err) {
+            console.error("Failed to fetch tags:", err);
+        }
+
+        tagInput.addEventListener("input", () => {
+            const currentInput = tagInput.value;
+
+            const selectedTags = currentInput.split(/[\n,]+/)
+                .map(tag => tag.trim())
+                .filter(tag => tag.length > 0);
+
+            const selectedTagsLower = selectedTags.map(tag => tag.toLowerCase());
+
+            const lastTag = selectedTags.length > 0
+                ? selectedTags[selectedTags.length - 1].toLowerCase()
+                : '';
+
+            const filteredSuggestions = allTags.filter(tag => {
+                const tagLower = tag.toLowerCase();
+                return tagLower.startsWith(lastTag) &&
+                    !selectedTagsLower.includes(tagLower);
+            });
+
+            suggestionsList.innerHTML = '';
+
+            if (lastTag && filteredSuggestions.length > 0) {
+                filteredSuggestions.forEach(tag => {
+                    if (tag.toLowerCase() !== lastTag) {
+                        const li = document.createElement("li");
+                        li.textContent = tag;
+                        li.classList.add("suggestion-item");
+                        li.addEventListener("click", () => {
+                            selectedTags[selectedTags.length - 1] = tag;
+                            tagInput.value = selectedTags.join(', ') + ', ';
+                            suggestionsList.style.display = 'none';
+                        });
+                        suggestionsList.appendChild(li);
+                    }
+                });
+
+                suggestionsList.style.display = filteredSuggestions.length > 0
+                    ? 'block'
+                    : 'none';
+            } else {
+                suggestionsList.style.display = 'none';
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!suggestionsList.contains(e.target) && e.target !== tagInput) {
+                suggestionsList.style.display = 'none';
+            }
+        });
+    });
+</script>

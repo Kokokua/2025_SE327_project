@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Profile - B Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .profile-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #fffff0;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-header {
+      color: #fbc02d;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .profile-field {
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-container label {
+      display: block;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-container input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid #ffcc00;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .apply-btn {
+      background: #ffcc00;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      display: block;
+      margin: 2rem auto 0;
+      transition: background 0.3s;
+    }
+
+    .apply-btn:hover {
+      background: #ffb300;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+    <div class="profile-container">
+      <h1 class="profile-header">Your Profile</h1>
+      <form id="profileForm">
+        <div class="profile-field">
+          <label for="username">Username</label>
+          <input type="text" id="username" required>
+        </div>
+
+        <div class="profile-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+        </div>
+
+        <div class="profile-field">
+          <label for="password">New Password (leave blank to keep current)</label>
+          <input type="password" id="password">
+        </div>
+
+        <div class="profile-field">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" required>
+        </div>
+
+        <button type="submit" class="apply-btn">Apply Changes</button>
+      </form>
+    </div>
+
+    <script>
+      // Get user ID from JWT token
+      function getUserId() {
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.userId;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      async function loadProfile() {
+        try {
+          const userId = getUserId();
+          if (!userId) {
+            window.location.href = '/login';
+            return;
+          }
+
+          // Get user data
+          const response = await fetch(`/api/users/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          if (!response.ok) throw new Error('Failed to load profile');
+
+          const user = await response.json();
+
+          document.getElementById('username').value = user.username;
+          document.getElementById('email').value = user.email;
+          document.getElementById('dob').value = user.date_of_birth.split('T')[0];
+
+        } catch (error) {
+          alert(error.message);
+          window.location.href = '/login';
+        }
+      }
+
+      // Update profile
+      document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const userId = getUserId();
+        if (!userId) return;
+
+        const formData = {
+          username: document.getElementById('username').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value,
+          date_of_birth: document.getElementById('dob').value
+        };
+
+        // Validation checks
+        try {
+          // Email validation
+          if (!formData.email.includes('@')) {
+            throw new Error("Invalid email format. Email must contain '@'.");
+          }
+
+          // Date of Birth validation
+          const dobDate = new Date(formData.date_of_birth);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const minDate = new Date(today);
+          minDate.setFullYear(today.getFullYear() - 100);
+
+          dobDate.setHours(0, 0, 0, 0);
+
+          if (dobDate > today) {
+            throw new Error("Date of birth cannot be in the future.");
+          }
+
+          if (dobDate < minDate) {
+            throw new Error("Date of birth cannot be more than 100 years ago.");
+          }
+
+          // Password validation (only if password is being changed)
+          if (formData.password) {
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%?&])[A-Za-z\d@#$!%?&]{8,12}$/;
+            if (!passwordRegex.test(formData.password)) {
+              throw new Error("Password must be 8-12 characters with at least one uppercase, lowercase, number, and special character (@#$!%?&)");
+            }
+
+            const lowerPassword = formData.password.toLowerCase();
+            const lowerUsername = formData.username.toLowerCase();
+            const lowerEmail = formData.email.toLowerCase();
+
+            if (lowerPassword.includes(lowerUsername) || lowerPassword.includes(lowerEmail)) {
+              throw new Error("Password should not contain parts of your username or email.");
+            }
+          }
+
+
+          try {
+            const response = await fetch(`/api/users/${userId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Update failed');
+            }
+
+            alert('Profile updated successfully!');
+            window.location.reload();
+
+          } catch (error) {
+            alert(error.message);
+          }
+        } catch (error) {
+          alert(error.message);
+        }
+      });
+      // Initial load
+      document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> <%-
+      include('partials/footer') %>
+</body>
+
+</html>

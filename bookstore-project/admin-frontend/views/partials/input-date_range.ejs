@@ -1,0 +1,57 @@
+<div class="mb-3">
+    <label for="start-<%= subject %>-<%= suffix %>" class="form-label">
+        <%= label %>
+    </label>
+    <div class="d-flex justify-content-between">
+        <input type="date" id="start-<%= subject %>-<%= suffix %>" class="form-control"
+            placeholder="<%= startPlaceholder %>">
+        <span class="d-flex align-items-center">to</span>
+        <input type="date" id="end-<%= subject %>-<%= suffix %>" class="form-control"
+            placeholder="<%= endPlaceholder %>">
+    </div>
+</div>
+
+<style>
+    input[id^="start-<%= subject %>-"],
+    input[id^="end-<%= subject %>-"] {
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    input[id^="start-<%= subject %>-"]:focus,
+    input[id^="end-<%= subject %>-"]:focus {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    input[id^="start-<%= subject %>-"]::placeholder,
+    input[id^="end-<%= subject %>-"]::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+        opacity: 1 !important;
+    }
+
+    input[id^="start-<%= subject %>-"]::-webkit-input-placeholder,
+    input[id^="end-<%= subject %>-"]::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    input[id^="start-<%= subject %>-"]::-moz-placeholder,
+    input[id^="end-<%= subject %>-"]::-moz-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    input[id^="start-<%= subject %>-"]:-ms-input-placeholder,
+    input[id^="end-<%= subject %>-"]:-ms-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: white !important;
+        background-color: #333 !important;
+        border-radius: 50%;
+        padding: 5px;
+        cursor: pointer;
+    }
+</style>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #2e2e2e;
+            color: #f1f1f1;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #ffc107;
+        }
+
+        .card {
+            border-radius: 15px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .table-dark {
+            --bs-table-bg: #1a1a1a;
+            --bs-table-striped-bg: #222;
+            --bs-table-hover-bg: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table-dark th {
+            background-color: #333;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <div class="container mt-4" style="padding-top: 56px;">
+            <h1 class="mb-4">Dashboard</h1>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <a href="/admin/books" style="text-decoration: none; color: inherit;">
+                        <div class="card bg-dark text-light border-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Books</h5>
+                                <h2 id="totalBooks" class="card-text">0</h2>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/admin/orders" style="text-decoration: none; color: inherit;">
+                        <div class="card bg-dark text-light border-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Orders</h5>
+                                <h2 id="totalOrders" class="card-text">0</h2>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/admin/users" style="text-decoration: none; color: inherit;">
+                        <div class="card bg-dark text-light border-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Users</h5>
+                                <h2 id="totalUsers" class="card-text">0</h2>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <h3 class="mb-3">Recent Orders</h3>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentOrders">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            Promise.all([
+                fetch('/api/books/total').then(r => r.json()),
+                fetch('/api/orders/stats').then(r => r.json()),
+                fetch('/api/users/total').then(r => r.json())
+            ]).then(([books, orders, users]) => {
+                document.getElementById('totalBooks').textContent = books.total || 0;
+                document.getElementById('totalOrders').textContent = orders.total || 0;
+                document.getElementById('totalUsers').textContent = users.total || 0;
+
+                const tbody = document.getElementById('recentOrders');
+                tbody.innerHTML = '';
+
+                if (orders.recent?.length) {
+                    orders.recent.forEach(order => {
+                        const row = `
+                        <tr>
+                        <td>${order.id}</td>
+                        <td>${order.username}</td>
+                        <td>$${Number(order.total_price).toFixed(2)}</td>
+                        <td>${order.created_at}</td>
+                        </tr>
+                    `;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                } else {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center">No recent orders found</td>
+                    </tr>
+                    `;
+                }
+            });
+        </script>
+</body>
+
+</html>

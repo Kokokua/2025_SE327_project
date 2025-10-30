@@ -1,0 +1,201 @@
+<script>
+  function checkAuth() {
+    const token = localStorage.getItem('token');
+    const authLinks = document.querySelector('.auth-links');
+    const userLinks = document.querySelector('.user-links');
+
+    // Get the profile icon link
+    const profileIconLink = document.querySelector('.icons a[href="/login"]');
+    const cartIconLink = document.querySelector('.icons a[href="/cart"]');
+    const cartCountBadge = document.querySelector('.cart-count-badge');
+
+    if (token) {
+      if (profileIconLink) profileIconLink.href = '/profile';
+      if (cartIconLink) cartIconLink.href = '/cart';
+      if (authLinks) authLinks.style.display = 'none';
+      if (userLinks) userLinks.style.display = 'block';
+    } else {
+      if (profileIconLink) profileIconLink.href = '/login';
+      if (cartIconLink) cartIconLink.href = '/login';
+      if (authLinks) authLinks.style.display = 'block';
+      if (userLinks) userLinks.style.display = 'none';
+    }
+    updateCartCount();
+  }
+
+  function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('shopping_cart')) || [];
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const token = localStorage.getItem('token');
+
+    document.querySelectorAll('.cart-count').forEach(el => {
+      if (token) {
+        el.textContent = totalItems || '';
+        el.style.setProperty('display', totalItems ? 'inline-block' : 'none', 'important');
+        el.style.backgroundColor = '#e74c3c';
+      } else {
+        el.style.setProperty('display', 'none', 'important');
+        el.textContent = '';
+        el.style.backgroundColor = '';
+      }
+    });
+  }
+
+  // Logout function ========================================
+  function logout() {
+    localStorage.removeItem('token');
+    checkAuth(); // Update UI immediately
+    window.location.href = '/login';
+  }
+
+  // Initial check when page loads ==========================
+  document.addEventListener('DOMContentLoaded', checkAuth);
+</script>
+
+<header>
+  <div class="hamburger">
+    <img src="/images/Icons/HamburgerIcon.png" alt="Hamburger" />
+  </div>
+  <div class="logo">B Store</div>
+  <div class="search-container">
+    <%- include('partials/input-tags-light', { suffix: 'searchbar' }) %>
+      <button class="search-btn" onclick="handleSearch()">Search</button>
+      <div class="icons">
+        <a href="/cart" class="nav-link">
+          <i class="bi bi-cart"></i>
+          <span class="cart-count-badge badge rounded-pill cart-count"></span>
+        </a>
+        <a href="/login" class="icon-link">
+          <img src="/images/Icons/ProfileIcon.png" alt="Profile" class="icon" />
+        </a>
+      </div>
+  </div>
+  <div class="auth-links">
+    <a href="/login">Login</a> | <a href="/sign-up">Sign up</a>
+  </div>
+
+  <div class="user-links" style="display: none;">
+    <a href="/" onclick="logout()">Logout</a>
+  </div>
+</header>
+
+<nav>
+  <a href="/">Home</a>
+  <a href="/general?predefined=true&topic=Today%20Deals&type=discounted">Today Deal</a>
+  <a href="/general?predefined=true&topic=Bestseller&type=bestseller">Best Seller</a>
+  <a href="/general?predefined=true&topic=New%20Arrival&type=newest">New Arrival</a>
+  <a href="/general?predefined=true&topic=Recommend&type=recommend">Recommend</a>
+  <a href="/general?predefined=true&topic=Poetry&type=tag&query=Poetry">Poetry</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+<style>
+  /* Header */
+  header {
+    background: yellow;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hamburger {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+
+  .hamburger img {
+    width: 45px;
+    height: 45px;
+  }
+
+  header .logo {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+  .auth-links a {
+    text-decoration: none;
+    color: black;
+  }
+
+  nav {
+    background: #ffcc00;
+    padding: 10px;
+    text-align: center;
+    display: block;
+  }
+
+  nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+    transition: color 0.3s ease;
+  }
+
+  nav a:hover {
+    color: #ff5733;
+    text-decoration: underline;
+  }
+
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .icon-link {
+    text-decoration: none;
+  }
+
+  .icon {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .icon:hover {
+    transform: scale(1.1);
+  }
+
+  .auth-links,
+  .user-links {
+    padding-right: 20px;
+  }
+
+  .user-links a {
+    font-weight: bold;
+    color: black;
+  }
+
+  .cart-count-badge {
+    background-color: #e74c3c;
+    font-size: 0.75rem;
+    margin-left: 0.4rem;
+    vertical-align: text-top;
+  }
+
+  .cart-count {
+    display: inline-block !important;
+  }
+</style>

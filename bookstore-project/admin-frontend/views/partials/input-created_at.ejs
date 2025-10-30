@@ -1,0 +1,39 @@
+<div class="mb-3">
+    <label for="input-created_at" class="form-label">Created at</label>
+    <input type="text" id="input-created_at-<%= suffix %>" class="form-control" placeholder="created_at" value="<%= typeof value !== 'undefined' ? _.escape(value) : '' %>">
+</div>
+
+<style>
+    input[id^="input-created_at-"] {
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    input[id^="input-created_at-"]:focus {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    .form-label[for^="input-created_at"] {
+        color: #fff !important;
+    }
+
+    input[id^="input-created_at-"]::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+        opacity: 1 !important;
+    }
+
+    input[id^="input-created_at-"]::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-created_at-"]::-moz-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-created_at-"]:-ms-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+</style>

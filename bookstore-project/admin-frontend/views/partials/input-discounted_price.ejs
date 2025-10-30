@@ -1,0 +1,35 @@
+<div class="mb-3">
+    <label for="input-discounted_price" class="form-label">Discounted price</label>
+    <input type="number" id="input-discounted_price-<%= suffix %>" class="form-control" placeholder="Discounted Price" value="<%= typeof value !== 'undefined' ? _.escape(value) : '' %>">
+</div>
+
+<style>
+    input[id^="input-discounted_price-"] {
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    input[id^="input-discounted_price-"]:focus {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    input[id^="input-discounted_price-"]::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+        opacity: 1 !important;
+    }
+
+    input[id^="input-discounted_price-"]::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-discounted_price-"]::-moz-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-discounted_price-"]:-ms-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+</style>

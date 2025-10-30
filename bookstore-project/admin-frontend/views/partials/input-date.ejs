@@ -1,0 +1,43 @@
+<div class="mb-3">
+    <label for="input-<%= subject %>-<%= suffix %>" class="form-label"><%= label %></label>
+    <input type="date" id="input-<%= subject %>-<%= suffix %>" class="form-control"placeholder="<%= placeholder %>">
+</div>
+
+<style>
+    input[id^="input-<%= subject %>-"] {
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    input[id^="input-<%= subject %>-"]:focus {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    input[id^="input-<%= subject %>-"]::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+        opacity: 1 !important;
+    }
+
+    input[id^="input-<%= subject %>-"]::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-<%= subject %>-"]::-moz-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-<%= subject %>-"]:-ms-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: white !important;
+        background-color: #333 !important;
+        border-radius: 50%;
+        padding: 5px;
+        cursor: pointer;
+    }
+</style>

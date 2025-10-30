@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Books</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #2e2e2e;
+            color: #f1f1f1;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #ffc107;
+        }
+
+        details {
+            background-color: #3a3a3a;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        summary {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ffc107;
+            cursor: pointer;
+            outline: none;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "▼";
+            float: right;
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        table.tag-table {
+            width: 100%;
+            margin-top: 10px;
+            background-color: #2e2e2e;
+            color: #f1f1f1;
+            border-collapse: separate;
+            border-spacing: 4px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table.tag-table thead {
+            background-color: #444;
+            color: #ffc107;
+        }
+
+        table.tag-table th,
+        table.tag-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid #555;
+            background-color: #222;
+            border-radius: 6px;
+        }
+
+        table.tag-table img {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        table.tag-table tbody tr:hover {
+            background-color: #555;
+        }
+
+        table.tag-table tbody tr {
+            cursor: pointer;
+        }
+
+        table.tag-table tbody tr:hover {
+            text-decoration: underline;
+        }
+
+        #tags-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .tag-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .tag-table td,
+        .tag-table th {
+            word-wrap: break-word;
+            max-width: 200px;
+        }
+
+        .tag-table img {
+            max-width: 100px;
+            height: auto;
+        }
+
+        .popup-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+            min-width: 300px;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #reset-filter-btn,
+        #delete-editor-btn {
+            background-color: transparent;
+            border: 2px solid red;
+            color: red;
+            transition: all 0.3s ease;
+        }
+
+        #reset-filter-btn:hover,
+        #delete-editor-btn:hover {
+            background-color: red;
+            color: white;
+        }
+
+        #book-popup,
+        #creator-popup {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+            max-width: 50vw;
+            max-height: 90vh;
+            margin-top: 30px;
+            width: 70%;
+            height: auto;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        #book-popup img,
+        #creator-popup img {
+            width: 25vw;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .details-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .details-container .form-control {
+            margin-right: 12px;
+        }
+
+        .details-container div:last-child {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        #apply-editor-btn,
+        #delete-editor-btn {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #book-popup h3,
+        #creator-popup h3 {
+            margin-bottom: 15px;
+        }
+
+        #book-popup .details-container strong,
+        #creator-popup .details-container strong {
+            color: #ffc107;
+        }
+
+        .image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+
+            #book-popup,
+            #creator-popup {
+                flex-direction: column;
+                max-width: 90vw;
+                max-height: 90vh;
+                overflow: auto;
+            }
+
+            #book-popup img,
+            #creator-popup img {
+                width: 100%;
+                max-height: 40vh;
+            }
+
+            .details-container {
+                overflow: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <div class="container mt-4" style="padding-top: 56px;">
+            <div class="d-flex align-items-center">
+                <h1>Manage Books</h1>
+                <div class="ms-2">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-secondary btn-sm" style="color: lightgrey;" id="tag-manager-btn">
+                            Manage Tags
+                        </button>
+                        <button type="button"
+                            class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="color: lightgrey;">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="showTagManager('add')">Add Tag</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showTagManager('delete')">Delete Tag</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showTagManager('rename')">Rename Tag</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showTagManager('view')">View all Tags</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" style="color: lightgrey;" id="book-creator-btn">
+                        Add Book
+                    </button>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <%- include('partials/searchbar_with_filter', { placeholder: 'Search by title or tags...' }) %>
+                <div id="tags-container" class="mt-3"></div>
+            </div>
+            <div id="creator-popup" class="popup-menu" style="display: none;">
+                <div class="image-section">
+                    <img src="">
+                    <div class="mt-2">
+                        <input type="file" id="image-upload-creator" accept="image/*" hidden>
+                        <button type="button" class="btn btn-sm btn-secondary"
+                            onclick="document.getElementById('image-upload-creator').click()">
+                            Upload Image
+                        </button>
+                    </div>
+                </div>
+                <div class="details-container">
+                    <%- include('partials/input-title', { suffix: 'creator' }) %>
+                        <%- include('partials/input-description', { suffix: 'creator' }) %>
+                            <%- include('partials/input-seller', { suffix: 'creator' }) %>
+                                <%- include('partials/input-tags', { suffix: 'creator' }) %>
+                                    <%- include('partials/input-price', { suffix: 'creator' }) %>
+                                        <%- include('partials/input-discounted_price', { suffix: 'creator' }) %>
+                                            <button id="create-book-btn" class="btn btn-primary mt-3">Add</button>
+                </div>
+            </div>
+            <div id="filter-popup" class="popup-menu" style="display: none;">
+                <%- include('partials/input-id', { suffix: 'filter' }) %>
+                    <%- include('partials/input-title', { suffix: 'filter' }) %>
+                        <%- include('partials/input-description', { suffix: 'filter' }) %>
+                            <%- include('partials/input-seller', { suffix: 'filter' }) %>
+                                <%- include('partials/input-tags', { suffix: 'filter' }) %>
+                                    <%- include('partials/input-price_range', { suffix: 'filter' }) %>
+                                        <button id="apply-filter-btn" class="btn btn-primary mt-3">Search</button>
+                                        <button id="reset-filter-btn" class="btn btn-primary mt-3">Reset</button>
+            </div>
+            <div id="book-popup" class="popup-menu" style="display: none;">
+                <div class="image-section">
+                    <img src="" alt="Book image">
+                    <div class="mt-2">
+                        <input type="file" id="image-upload-editor" accept="image/*" hidden>
+                        <button type="button" class="btn btn-sm btn-secondary"
+                            onclick="document.getElementById('image-upload-editor').click()">
+                            Change Image
+                        </button>
+                    </div>
+                </div>
+                <div class="details-container">
+                    <%- include('partials/input-id', { suffix: 'editor' }) %>
+                        <%- include('partials/input-title', { suffix: 'editor' }) %>
+                            <%- include('partials/input-description', { suffix: 'editor' }) %>
+                                <%- include('partials/input-seller', { suffix: 'editor' }) %>
+                                    <%- include('partials/input-tags', { suffix: 'editor' }) %>
+                                        <%- include('partials/input-price', { suffix: 'editor' }) %>
+                                            <%- include('partials/input-discounted_price', { suffix: 'editor' }) %>
+                                                <%- include('partials/input-created_at', { suffix: 'editor' }) %>
+                                                    <div class="d-flex gap-2">
+                                                        <button id="apply-editor-btn"
+                                                            class="btn btn-primary w-50">Apply</button>
+                                                        <button id="delete-editor-btn"
+                                                            class="btn btn-primary w-50">Delete</button>
+                                                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include('partials/popup-backdrop') %>
+        <%- include('partials/tagManager') %>
+
+            <script>
+                let allBooks = [];
+
+                fetch('/api/books')
+                    .then(response => response.json())
+                    .then(books => {
+                        allBooks = books;
+                        renderTags(groupByTags(allBooks));
+                    })
+                    .catch(error => {
+                        console.error('Error fetching books:', error);
+                    });
+
+                function groupByTags(books) {
+                    const grouped = {};
+                    books.forEach(book => {
+                        if (Array.isArray(book.tags)) {
+                            book.tags.forEach(tagName => {
+                                if (!grouped[tagName]) {
+                                    grouped[tagName] = [];
+                                }
+                                grouped[tagName].push(book);
+                            });
+                        }
+                    });
+                    return grouped;
+                }
+
+                function renderTags(groupedByTag) {
+                    const tagsContainer = document.getElementById('tags-container');
+                    tagsContainer.innerHTML = '';
+                    const sortedTagNames = Object.keys(groupedByTag).sort((a, b) => a.localeCompare(b));
+
+                    sortedTagNames.forEach(tagName => {
+                        const details = document.createElement('details');
+                        const summary = document.createElement('summary');
+                        summary.textContent = tagName;
+                        details.appendChild(summary);
+
+                        const table = document.createElement('table');
+                        table.classList.add('tag-table');
+
+                        const thead = document.createElement('thead');
+                        thead.innerHTML = `
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Tags</th>
+                            <th>Seller</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Discounted Price</th>
+                            <th>Image</th>
+                            <th>Created At</th>
+                        </tr>
+                    `;
+                        table.appendChild(thead);
+
+                        const tbody = document.createElement('tbody');
+                        groupedByTag[tagName].forEach(book => {
+                            const formattedDate = new Date(book.created_at).toLocaleString();
+                            const row = document.createElement('tr');
+                            row.addEventListener('click', () => showBookPopup(book));
+                            row.innerHTML = `
+                            <td>${book.id}</td>
+                            <td>${book.title}</td>
+                            <td>${(book.tags || []).join(', ')}</td>
+                            <td>${book.seller}</td>
+                            <td>${book.description || ''}</td>
+                            <td>${book.price}</td>
+                            <td>${book.discounted_price || '-'}</td>
+                            <td>
+                                ${book.image
+                                    ? `<img src="${book.image}" alt="${book.title}" />`
+                                    : 'No Image'}
+                            </td>
+                            <td>${formattedDate}</td>
+                        `;
+                            tbody.appendChild(row);
+                        });
+
+                        table.appendChild(tbody);
+                        details.appendChild(table);
+                        tagsContainer.appendChild(details);
+                        const tableWrapper = document.createElement('div');
+                        tableWrapper.classList.add('table-responsive');
+                        tableWrapper.appendChild(table);
+                        details.appendChild(tableWrapper);
+                    });
+                }
+
+                // EDITOR
+                function showBookPopup(book) {
+                    const bookPopup = document.getElementById('book-popup');
+                    const bookImage = bookPopup.querySelector('img');
+                    const bookDetails = document.getElementById('book-details');
+                    const formattedDate = new Date(book.created_at).toLocaleString();
+
+                    bookImage.src = book.image || 'no image';
+                    bookImage.alt = book.title;
+                    const imageUpload = document.getElementById('image-upload-editor');
+                    imageUpload.value = '';
+
+                    imageUpload.addEventListener('change', function (e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                bookImage.src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    document.getElementById('input-id-editor').value = book.id;
+                    document.getElementById('input-title-editor').value = book.title || '';
+                    document.getElementById('input-description-editor').value = book.description || '';
+                    document.getElementById('input-seller-editor').value = book.seller || '';
+                    document.getElementById('input-tags-editor').value = (book.tags || []).join(', ');
+                    document.getElementById('input-price-editor').value = book.price || '';
+                    document.getElementById('input-discounted_price-editor').value = book.discounted_price || '';
+                    document.getElementById('input-created_at-editor').value = formattedDate || '';
+
+                    const createdAtInput = document.getElementById('input-created_at-editor');
+                    const idInput = document.getElementById('input-id-editor');
+
+                    createdAtInput.value = formattedDate || '';
+                    idInput.value = book.id;
+                    createdAtInput.disabled = true;
+                    idInput.disabled = true;
+                    createdAtInput.style.cursor = 'not-allowed';
+                    idInput.style.cursor = 'not-allowed';
+
+                    bookPopup.style.display = 'flex';
+                    document.getElementById('popup-backdrop').style.display = 'block';
+                }
+
+                document.getElementById('apply-editor-btn').addEventListener('click', async () => {
+                    try {
+                        const bookId = document.getElementById('input-id-editor').value;
+                        const tagsInput = document.getElementById('input-tags-editor').value;
+                        const enteredTags = tagsInput.split(/[\n,]+/).map(tag => tag.trim()).filter(tag => tag.length > 0);
+
+                        const price = parseFloat(document.getElementById('input-price-editor').value);
+                        if (price < 0) {
+                            throw new Error('Price cannot be negative');
+                        }
+
+                        // Create FormData object
+                        const formData = new FormData();
+                        formData.append('title', document.getElementById('input-title-editor').value);
+                        formData.append('description', document.getElementById('input-description-editor').value);
+                        formData.append('seller', document.getElementById('input-seller-editor').value);
+                        formData.append('price', price);
+                        formData.append('discounted_price', document.getElementById('input-discounted_price-editor').value || '');
+                        formData.append('tags', enteredTags.join(','));
+
+                        // Append image file if selected
+                        const imageFile = document.getElementById('image-upload-editor').files[0];
+                        if (imageFile) {
+                            formData.append('image', imageFile);
+                        }
+
+                        // Send PUT request with FormData
+                        const response = await fetch(`/api/books/${bookId}`, {
+                            method: 'PUT',
+                            body: formData
+                        });
+
+                        const responseData = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(responseData.error || 'Failed to update book');
+                        }
+                        alert('Book updated successfully!');
+
+                        document.getElementById('book-popup').style.display = 'none';
+                        document.getElementById('popup-backdrop').style.display = 'none';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    } catch (err) {
+                        console.error('Update error:', err);
+                        alert('Failed to update book: ' + err.message);
+                    }
+                });
+
+                document.getElementById('delete-editor-btn').addEventListener('click', async () => {
+                    const bookId = document.getElementById('input-id-editor').value;
+
+                    if (!confirm('Are you sure you want to permanently delete this book?')) return;
+
+                    try {
+                        const response = await fetch(`/api/books/${bookId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(await response.text());
+                        }
+
+                        document.getElementById('book-popup').style.display = 'none';
+                        document.getElementById('popup-backdrop').style.display = 'none';
+                        alert('Book deleted successfully');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    } catch (err) {
+                        console.error('Delete error:', err);
+                        alert('Error deleting book: ' + err.message);
+                    }
+                });
+
+                // CLOSE POPUP
+                document.getElementById('popup-backdrop').addEventListener('mousedown', () => {
+                    const bookPopup = document.getElementById('book-popup');
+                    const filterPopup = document.getElementById('filter-popup');
+                    const tagManagerPopup = document.getElementById('tag-manager-popup');
+                    const creatorPopup = document.getElementById('creator-popup');
+
+                    bookPopup.style.display = 'none';
+                    filterPopup.style.display = 'none';
+                    tagManagerPopup.style.display = 'none';
+                    creatorPopup.style.display = 'none';
+
+                    document.getElementById('popup-backdrop').style.display = 'none';
+                });
+
+                // ADD BOOK
+                document.getElementById('book-creator-btn').addEventListener('click', () => {
+                    const creatorPopup = document.getElementById('creator-popup');
+                    const bookImage = creatorPopup.querySelector('img');
+
+                    const imageUpload = document.getElementById('image-upload-creator');
+                    imageUpload.value = '';
+                    bookImage.src = '';
+
+                    imageUpload.addEventListener('change', function (e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                bookImage.src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    document.getElementById('input-title-creator').value = '';
+                    document.getElementById('input-description-creator').value = '';
+                    document.getElementById('input-seller-creator').value = '';
+                    document.getElementById('input-tags-creator').value = '';
+                    document.getElementById('input-price-creator').value = '';
+                    document.getElementById('input-discounted_price-creator').value = '';
+
+                    creatorPopup.style.display = 'flex';
+                    document.getElementById('popup-backdrop').style.display = 'block';
+                });
+
+                document.getElementById('create-book-btn').addEventListener('click', () => {
+                    const formData = new FormData();
+                    const imageFile = document.getElementById('image-upload-creator').files[0];
+
+                    // Append all form fields
+                    formData.append('title', document.getElementById('input-title-creator').value);
+                    formData.append('description', document.getElementById('input-description-creator').value);
+                    formData.append('seller', document.getElementById('input-seller-creator').value);
+                    formData.append('tags', document.getElementById('input-tags-creator').value);
+                    formData.append('price', document.getElementById('input-price-creator').value);
+                    formData.append('discounted_price', document.getElementById('input-discounted_price-creator').value);
+
+                    if (imageFile) {
+                        formData.append('image', imageFile);
+                    }
+
+                    fetch('/api/books', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => { throw err; });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            document.getElementById('creator-popup').style.display = 'none';
+                            document.getElementById('popup-backdrop').style.display = 'none';
+                            alert('Book added successfully');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 500);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert(`Error adding book: ${error.error || error.message}`);
+                        });
+                });
+
+                // SEARCH FUNCTION
+                document.getElementById('search-input').addEventListener('input', () => {
+                    const query = document.getElementById('search-input').value.trim().toLowerCase();
+
+                    if (!query) {
+                        renderTags(groupByTags(allBooks));
+                        return;
+                    }
+
+                    const filtered = allBooks.filter(book =>
+                        book.title.toLowerCase().includes(query) ||
+                        (book.tags || []).some(tag => tag.toLowerCase().includes(query))
+                    );
+
+                    renderTags(groupByTags(filtered));
+                });
+
+                document.getElementById('filter-button').addEventListener('click', () => {
+                    const popup = document.getElementById('filter-popup');
+                    const backdrop = document.getElementById('popup-backdrop');
+
+                    const isVisible = popup.style.display === 'block';
+
+                    popup.style.display = isVisible ? 'none' : 'block';
+                    backdrop.style.display = isVisible ? 'none' : 'block';
+                });
+
+                document.getElementById('apply-filter-btn').addEventListener('click', () => {
+                    const id = document.getElementById('input-id-filter').value.trim();
+                    const title = document.getElementById('input-title-filter').value.trim().toLowerCase();
+                    const description = document.getElementById('input-description-filter').value.trim().toLowerCase();
+                    const seller = document.getElementById('input-seller-filter').value.trim().toLowerCase();
+                    const tagsInput = document.getElementById('input-tags-filter').value.trim().toLowerCase();
+                    const requiredTags = tagsInput.split(',').map(tag => tag.trim()).filter(Boolean);
+                    const minPriceInput = document.getElementById('input-price-min-filter').value.trim();
+                    const maxPriceInput = document.getElementById('input-price-max-filter').value.trim();
+                    const minPrice = minPriceInput ? parseFloat(minPriceInput) : 0;
+                    const maxPrice = maxPriceInput ? parseFloat(maxPriceInput) : Infinity;
+
+                    let isValid = true;
+                    let errorMessage = '';
+
+                    if (id && (isNaN(id) || parseInt(id) <= 0)) {
+                        alert('ID must be a positive number.');
+                        return;
+                    }
+
+                    if (!isNaN(minPrice) && minPrice < 0) {
+                        errorMessage = 'Price cannot be negative.';
+                        isValid = false;
+                    }
+
+                    if (!isNaN(maxPrice) && maxPrice < 0) {
+                        errorMessage = 'Price cannot be negative.';
+                        isValid = false;
+                    }
+
+                    if (minPrice > maxPrice && !isNaN(minPrice) && !isNaN(maxPrice)) {
+                        errorMessage = 'Min price cannot be greater than Max price.';
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        alert(errorMessage);
+                        return;
+                    }
+
+                    const filtered = allBooks.filter(book => {
+                        if (id && String(book.id) !== id) return false;
+                        if (title && !book.title.toLowerCase().includes(title)) return false;
+                        if (description && !(book.description || '').toLowerCase().includes(description)) return false;
+                        if (seller && !(book.seller || '').toLowerCase().includes(seller)) return false;
+                        if (requiredTags.length > 0) {
+                            const bookTags = (book.tags || []).map(tag => tag.toLowerCase());
+                            if (!requiredTags.every(tag => bookTags.includes(tag))) return false;
+                        }
+                        if (book.price < minPrice || book.price > maxPrice) return false;
+
+                        return true;
+                    });
+
+                    renderTags(groupByTags(filtered));
+
+                    document.getElementById('search-input').value = '';
+                    document.getElementById('filter-popup').style.display = 'none';
+                    document.getElementById('popup-backdrop').style.display = 'none';
+                });
+
+                document.getElementById('reset-filter-btn').addEventListener('click', () => {
+                    document.getElementById('input-id-filter').value = '';
+                    document.getElementById('input-title-filter').value = '';
+                    document.getElementById('input-description-filter').value = '';
+                    document.getElementById('input-seller-filter').value = '';
+                    document.getElementById('input-tags-filter').value = '';
+                    document.getElementById('input-price-min-filter').value = '';
+                    document.getElementById('input-price-max-filter').value = '';
+                });
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

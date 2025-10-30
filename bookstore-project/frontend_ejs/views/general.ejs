@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Catalog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            background-color: #f1f1f1;
+            color: #2e2e2e;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: black;
+        }
+
+        #books-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px 0;
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: auto;
+            scroll-behavior: auto;
+            scrollbar-width: none;
+        }
+
+        .product-card {
+            max-width: 100%;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.3s ease,
+                background-color 0.3s ease;
+        }
+
+        .product-card:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            backdrop-filter: brightness(0.98);
+        }
+
+        .product-card:hover .image-container {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .image-container {
+            height: 400px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: inherit;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: scale-down;
+            transition: transform 0.3s ease;
+            mix-blend-mode: normal;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .title {
+            color: #333;
+            font-size: 1.3rem;
+            margin: 10px 0;
+            overflow: hidden;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            text-align: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.4;
+        }
+
+        .price {
+            color: #222;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .price .original {
+            color: #999;
+            text-decoration: line-through;
+            margin-right: 8px;
+            font-weight: normal;
+            font-size: 0.8em;
+        }
+
+        .price .discounted {
+            color: #e74c3c;
+            font-size: 1.1em;
+            margin-right: 60px;
+        }
+
+        #pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        #page-info {
+            background-color: #fff9db;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #8a6d0b;
+            border: 1px solid #ffe066;
+            box-shadow: 0 2px 4px rgba(255, 204, 0, 0.1);
+        }
+
+        #prev-page,
+        #next-page {
+            background-color: #ffd700;
+            color: #4a3800;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 3px 6px rgba(255, 215, 0, 0.2);
+            border: 1px solid #ffec99;
+        }
+
+        #prev-page:hover,
+        #next-page:hover {
+            background-color: #ffc800;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 5px 12px rgba(255, 200, 0, 0.3);
+            color: #362900;
+        }
+
+        #prev-page:disabled,
+        #next-page:disabled {
+            background-color: #fff3b0;
+            color: #a38a4c;
+            border-color: #ffe680;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        #prev-page:active,
+        #next-page:active {
+            background-color: #ffd700;
+            box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .bi-arrow-left-short,
+        .bi-arrow-right-short {
+            color: #b38f00;
+            transition: color 0.3s ease;
+        }
+
+        #detail-image {
+            max-width: 100%;
+            height: 400px;
+            object-fit: scale-down;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #bookDetailsModal .modal-body {
+            padding: 2rem;
+        }
+
+        #bookDetailsModal h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .detail-item {
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .detail-item strong {
+            color: #2e2e2e;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        #detail-description {
+            margin-top: 1.5rem;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .modal-price {
+            font-size: 1.4rem;
+            margin: 1rem 0;
+        }
+
+        .modal-price .original {
+            color: #999;
+            text-decoration: line-through;
+            margin-right: 15px;
+        }
+
+        .modal-price .discounted {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .tag-pill {
+            background-color: #ffe066;
+            color: #4a3800;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tag-pill:hover {
+            background-color: #ffd700;
+            transform: translateY(-1px);
+        }
+
+        .tags-container {
+            margin: 1rem 0;
+            padding: 0.5rem 0;
+        }
+
+        #detail-tags {
+            min-height: 40px;
+        }
+
+        #add-to-cart-btn {
+            background-color: #ffd700;
+            border-color: #ffd700;
+            color: #4a3800;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        #add-to-cart-btn:hover {
+            background-color: #ffc800;
+            border-color: #ffc800;
+            transform: translateY(-1px);
+        }
+
+        #add-to-cart-btn:active {
+            background-color: #e6b800 !important;
+            border-color: #e6b800 !important;
+        }
+
+        /* Header */
+        header {
+            background: yellow;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .hamburger img {
+            width: 45px;
+            height: 45px;
+        }
+
+        /* Navigation */
+        nav {
+            background: #ffcc00;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            font-weight: bold;
+            color: black;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #ff5733;
+            text-decoration: underline;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .product-list {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .product-list {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+
+            .search-btn {
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .hamburger {
+                display: block !important;
+            }
+
+            nav {
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: opacity 0.7s ease, transform 0.7s ease;
+            }
+
+            nav a {
+                display: none;
+                margin: 5px 0;
+            }
+
+            nav.active {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            nav.active a {
+                display: block;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .product-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            header {
+                flex-direction: column;
+            }
+
+            .logo {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .auth-links {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/header') %>
+
+        <div class="container mt-4">
+            <div class="d-flex align-items-center justify-content-center w-100">
+                <h1 class="text-center"></h1>
+            </div>
+            <div class="input-group mb-3">
+                <input type="text" id="search-input" class="form-control" placeholder="Search">
+            </div>
+            <div id="books-container" class="mt-3"></div>
+            <div id="pagination-controls">
+                <button id="prev-page" class="btn">
+                    <i class="bi bi-arrow-left-short"></i>
+                    Previous
+                </button>
+                <span id="page-info" class="mx-2">Page 1 of 1</span>
+                <button id="next-page" class="btn">
+                    Next
+                    <i class="bi bi-arrow-right-short"></i>
+                </button>
+            </div>
+        </div>
+        <div class="modal fade" id="bookDetailsModal" tabindex="-1" aria-labelledby="bookDetailsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bookDetailsModalLabel">Book Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img id="detail-image" src="" alt="Book cover" class="img-fluid">
+                            </div>
+                            <div class="col-md-8">
+                                <h3 id="detail-title"></h3>
+                                <div class="modal-price" id="detail-price"></div>
+                                <div class="tags-container mb-3">
+                                    <strong>Tags:</strong>
+                                    <div id="detail-tags" class="d-flex flex-wrap gap-2 mt-2"></div>
+                                </div>
+                                <div id="detail-description"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="add-to-cart-btn">
+                            Add to Cart <i class="bi bi-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include('partials/footer') %>
+
+            <script>
+                let currentBook = null;
+                const CART_KEY = 'shopping_cart';
+
+                function getCart() {
+                    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+                }
+
+                function saveCart(cart) {
+                    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+                    updateCartCount();
+                }
+
+                function updateCartCount() {
+                    const cart = getCart();
+                    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                    document.querySelectorAll('.cart-count').forEach(el => {
+                        el.textContent = totalItems || '';
+                        el.style.display = totalItems ? 'inline-block' : 'none';
+                    });
+                }
+
+                function addToCart(bookId) {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    const cart = getCart();
+                    const existingItem = cart.find(item => item.bookId === bookId);
+
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.push({
+                            bookId: bookId,
+                            quantity: 1,
+                            addedAt: new Date().toISOString()
+                        });
+                    }
+
+                    saveCart(cart);
+                    showToast(`${currentBook.title} added to cart`);
+                }
+                document.getElementById('books-container').addEventListener('click', function (e) {
+                    const card = e.target.closest('.product-card');
+                    if (card) {
+                        const bookId = card.dataset.bookId;
+                        const book = allBooks.find(b => b.id == bookId);
+                        showBookDetails(book);
+                    }
+                });
+
+                document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+                    if (currentBook) {
+                        addToCart(currentBook.id);
+                    }
+                });
+
+                function showToast(message) {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast align-items-center text-white bg-success border-0';
+                    toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `;
+                    document.body.appendChild(toast);
+                    new bootstrap.Toast(toast, { autohide: true, delay: 3000 }).show();
+                    setTimeout(() => toast.remove(), 3500);
+                }
+
+                function showBookDetails(book) {
+                    currentBook = book;
+                    // Set basic information
+                    document.getElementById('detail-title').textContent = book.title;
+                    document.getElementById('detail-image').src = book.image || 'placeholder.jpg';
+
+                    // Set pricing information
+                    const priceElement = document.getElementById('detail-price');
+                    if (book.discounted_price) {
+                        priceElement.innerHTML = `
+                <span class="original">$${book.price.toFixed(2)}</span>
+                <span class="discounted">$${book.discounted_price.toFixed(2)}</span>
+            `;
+                    } else {
+                        priceElement.textContent = `$${book.price.toFixed(2)}`;
+                    }
+
+                    // Set tags
+                    const tagsContainer = document.getElementById('detail-tags');
+                    tagsContainer.innerHTML = ''; // Clear previous tags
+                    if (book.tags && book.tags.length > 0) {
+                        book.tags.forEach(tag => {
+                            const tagElement = document.createElement('span');
+                            tagElement.className = 'tag-pill';
+                            tagElement.textContent = tag;
+                            tagsContainer.appendChild(tagElement);
+                        });
+                    } else {
+                        tagsContainer.innerHTML = '<span class="text-muted">No tags available</span>';
+                    }
+
+                    // Set description
+                    document.getElementById('detail-description').textContent =
+                        book.description || 'No description available.';
+
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('bookDetailsModal'));
+                    modal.show();
+                }
+                let currentPage = 1;
+                let itemsPerPage = 18;
+                let currentFilteredBooks = [];
+                updateItemsPerPage();
+                let allBooks = [];
+                const urlParams = new URLSearchParams(window.location.search);
+                let scrollPosition = 0;
+
+                // Get parameters from URL
+                const isPredefined = urlParams.get('predefined') === 'true';
+                const searchTopic = urlParams.get('topic') || '';
+                const filterType = urlParams.get('type') || '';
+                const query = urlParams.get('query') || '';
+
+                // Set up UI
+                const h1 = document.querySelector('h1');
+                const searchInput = document.getElementById('search-input');
+
+                Promise.all([
+                    fetch('/api/books'),
+                    fetch('/api/orders')
+                ])
+                    .then(([booksRes, ordersRes]) => Promise.all([booksRes.json(), ordersRes.json()]))
+                    .then(([books, ordersData]) => {
+                        allBooks = books;
+                        const orders = ordersData.data;
+
+                        const orderCountMap = new Map();
+                        const revenueMap = new Map();
+
+                        orders.forEach(order => {
+                            const seenBooks = new Set(); // For order count tracking
+                            order.items.forEach(item => {
+                                const bookId = item.book_id;
+
+                                if (!seenBooks.has(bookId)) {
+                                    orderCountMap.set(bookId, (orderCountMap.get(bookId) || 0) + 1);
+                                    seenBooks.add(bookId);
+                                }
+
+                                const itemRevenue = item.price * item.quantity;
+                                revenueMap.set(bookId, (revenueMap.get(bookId) || 0) + itemRevenue);
+                            });
+                        });
+
+                        if (isPredefined) {
+                            let filteredBooks = books;
+                            switch (filterType) {
+                                case 'bestseller':
+                                    filteredBooks = [...books].sort((a, b) => {
+                                        const revenueA = revenueMap.get(a.id) || 0;
+                                        const revenueB = revenueMap.get(b.id) || 0;
+                                        return revenueB - revenueA || a.title.localeCompare(b.title);
+                                    });
+                                    break;
+
+                                case 'recommend':
+                                    filteredBooks = [...books].sort((a, b) => {
+                                        const countA = orderCountMap.get(a.id) || 0;
+                                        const countB = orderCountMap.get(b.id) || 0;
+                                        return countB - countA || a.title.localeCompare(b.title);
+                                    });
+                                    break;
+
+                                case 'tag':
+                                    filteredBooks = books
+                                        .filter(book => book.tags?.includes(query))
+                                        .sort((a, b) => {
+                                            // Primary: tag match, Secondary: order count, Tertiary: title
+                                            const countDiff = (orderCountMap.get(b.id) || 0) - (orderCountMap.get(a.id) || 0);
+                                            return countDiff !== 0 ? countDiff : a.title.localeCompare(b.title);
+                                        });
+                                    break;
+
+                                case 'discounted':
+                                    filteredBooks = books
+                                        .filter(book => book.discounted_price !== null)
+                                        .sort((a, b) => {
+                                            // Primary: discounted status, Secondary: order count, Tertiary: title
+                                            const countDiff = (orderCountMap.get(b.id) || 0) - (orderCountMap.get(a.id) || 0);
+                                            return countDiff !== 0 ? countDiff : a.title.localeCompare(b.title);
+                                        });
+                                    break;
+
+                                case 'newest':
+                                    filteredBooks = [...books].sort((a, b) => {
+                                        // Primary: creation date, Secondary: order count, Tertiary: title
+                                        const dateDiff = new Date(b.created_at) - new Date(a.created_at);
+                                        if (dateDiff !== 0) return dateDiff;
+                                        const countDiff = (orderCountMap.get(b.id) || 0) - (orderCountMap.get(a.id) || 0);
+                                        return countDiff !== 0 ? countDiff : a.title.localeCompare(b.title);
+                                    });
+                                    break;
+
+                                default:
+                                    // For other cases, sort by order count + title
+                                    filteredBooks = [...books].sort((a, b) => {
+                                        const countA = orderCountMap.get(a.id) || 0;
+                                        const countB = orderCountMap.get(b.id) || 0;
+                                        return countB - countA || a.title.localeCompare(b.title);
+                                    });
+                                    break;
+                            }
+
+                            currentFilteredBooks = filteredBooks;
+                            currentPage = 1;
+                            renderBooks();
+                            h1.textContent = searchTopic;
+                            h1.style.display = 'block';
+                        } else {
+                            searchInput.value = decodeURIComponent(searchTopic);
+                            setTimeout(() => searchInput.dispatchEvent(new Event('input')), 0);
+                            h1.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+
+                // Search functionality
+                document.getElementById('search-input').addEventListener('input', function (e) {
+                    const term = e.target.value.toLowerCase();
+                    const searchTerms = term.split(/\s+/);
+
+                    currentFilteredBooks = allBooks.filter(book => {
+                        const matchesSearch = searchTerms.every(searchTerm =>
+                            book.title.toLowerCase().includes(searchTerm) ||
+                            book.seller.toLowerCase().includes(searchTerm) ||
+                            book.description.toLowerCase().includes(searchTerm) ||
+                            book.tags?.some(tag => tag.toLowerCase().includes(searchTerm))
+                        );
+
+                        if (filterType === 'discounted') {
+                            return book.discounted_price !== null && matchesSearch;
+                        }
+
+                        return matchesSearch;
+                    });
+
+                    currentPage = 1;
+                    renderBooks();
+                });
+
+                function renderBooks(books) {
+                    if (books) {
+                        currentFilteredBooks = books;
+                    }
+
+                    const startIndex = (currentPage - 1) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    const paginatedBooks = currentFilteredBooks.slice(startIndex, endIndex);
+                    const totalPages = Math.ceil(currentFilteredBooks.length / itemsPerPage);
+
+                    const container = document.getElementById('books-container');
+                    container.innerHTML = paginatedBooks.length > 0
+                        ? paginatedBooks.map(book => `
+                        <div class="product-card" data-book-id="${book.id}">
+                            <div class="image-container">
+                                <img src="${book.image || 'placeholder.jpg'}" alt="${book.title}" loading="lazy">
+                            </div>
+                            <h3 class="title">${book.title}</h3>
+                            <div class="price">
+                                ${book.discounted_price ? `
+                                <span class="original">$${book.price.toFixed(2)}</span>
+                                <span class="discounted">$${book.discounted_price.toFixed(2)}</span>
+                                ` : `$${book.price.toFixed(2)}`}
+                            </div>
+                        </div>`).join('') : `<p class="empty-msg">No products found</p>`;
+
+                    document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+                    document.getElementById('prev-page').disabled = currentPage === 1;
+                    document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+                }
+
+                document.getElementById('prev-page').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderBooks();
+                    }
+                    document.getElementById('books-container').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+
+                document.getElementById('next-page').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const totalPages = Math.ceil(currentFilteredBooks.length / itemsPerPage);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderBooks();
+                    }
+                    document.getElementById('books-container').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+
+                function updateItemsPerPage() {
+                    const viewportWidth = window.innerWidth;
+                    if (viewportWidth < 576) {
+                        itemsPerPage = 6;
+                    } else if (viewportWidth < 768) {
+                        itemsPerPage = 8;
+                    } else if (viewportWidth < 992) {
+                        itemsPerPage = 12;
+                    } else {
+                        itemsPerPage = 18;
+                    }
+                    currentPage = 1;
+                    renderBooks();
+                }
+
+                window.addEventListener('resize', () => {
+                    updateItemsPerPage();
+                });
+                document.addEventListener('DOMContentLoaded', updateCartCount);
+                updateItemsPerPage();
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    const hamburger = document.querySelector(".hamburger");
+                    const nav = document.querySelector("nav");
+                    hamburger.addEventListener("click", function () {
+                        nav.classList.toggle("active");
+                    });
+                });             
+            </script>
+
+            <link rel="stylesheet"
+                href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

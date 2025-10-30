@@ -1,0 +1,350 @@
+<div id="tag-manager-popup" class="popup-menu" style="display: none; width: 400px;">
+    <div id="tag-manager-content">
+        <!-- Add Tag Form -->
+        <div id="add-tag-form" style="display: none;">
+            <h4>Add New Tag</h4>
+            <div class="mb-3">
+                <input type="text" id="new-tag-name" class="form-control dark-input" placeholder="Enter tag name">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="handleAddTag()">Create Tag</button>
+        </div>
+
+        <!-- Delete Tag Form -->
+        <div id="delete-tag-form" style="display: none;">
+            <h4>Delete Existing Tag</h4>
+            <div class="mb-3">
+                <input type="text" id="tag-search" class="form-control dark-input" placeholder="Search tags...">
+                <ul id="tag-delete-list" class="dark-dropdown mt-2" style="display: block; position: relative;"></ul>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="handleDeleteTag()">Delete Selected</button>
+        </div>
+
+        <!-- Rename Tag Form -->
+        <div id="rename-tag-form" style="display: none;">
+            <h4>Rename Existing Tag</h4>
+            <div class="mb-3">
+                <input type="text" id="tag-rename-search" class="form-control dark-input" placeholder="Search tags...">
+                <ul id="tag-rename-list" class="dark-dropdown mt-2" style="display: block; position: relative;"></ul>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="renamed-tag-name" class="form-control dark-input"
+                    placeholder="Enter new tag name">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="handleRenameTag()">Rename Selected</button>
+        </div>
+
+        <!-- View All Tags -->
+        <div id="view-tags-form" style="display: none;">
+            <h4>All Tags</h4>
+            <div class="mb-3">
+                <ul id="all-tags-list" class="dark-dropdown mt-2"
+                    style="display: block; position: relative; max-height: 300px; overflow-y: auto;"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tag Manager Functions
+    let allTags = [];
+
+    function showTagManager(mode) {
+        document.getElementById('tag-manager-popup').style.display = 'block';
+        document.getElementById('popup-backdrop').style.display = 'block';
+
+        // Hide all forms
+        document.getElementById('add-tag-form').style.display = 'none';
+        document.getElementById('delete-tag-form').style.display = 'none';
+        document.getElementById('rename-tag-form').style.display = 'none';
+        document.getElementById('view-tags-form').style.display = 'none';
+
+        if (mode === 'add') {
+            document.getElementById('add-tag-form').style.display = 'block';
+            document.getElementById('new-tag-name').value = '';
+        } else if (mode === 'delete') {
+            loadTagsForDeletion();
+        } else if (mode === 'rename') {
+            loadTagsForRename();
+        } else if (mode === 'view') {
+            loadAllTagsForView();
+        }
+    }
+
+    // ADD
+    async function handleAddTag() {
+        const tagName = document.getElementById('new-tag-name').value.trim();
+        if (!tagName) return;
+
+        try {
+            const response = await fetch('/api/tags', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: tagName })
+            });
+
+            if (response.ok) {
+                alert('Tag added successfully!');
+                // Refresh any tag inputs on the page
+                document.querySelectorAll('[id^="input-tags-"]').forEach(input => {
+                    input.dispatchEvent(new Event('input'));
+                });
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (err) {
+            alert('Failed to add tag. Please try again.');
+        }
+    }
+
+    // DELETE
+    async function loadTagsForDeletion() {
+        try {
+            const response = await fetch('/api/tags');
+            allTags = await response.json();
+            document.getElementById('delete-tag-form').style.display = 'block';
+            document.getElementById('add-tag-form').style.display = 'none';
+            updateDeleteTagList('');
+        } catch (err) {
+            console.error('Error fetching tags:', err);
+            alert('Failed to load tags');
+        }
+    }
+
+    function updateDeleteTagList(searchTerm) {
+        const filteredTags = allTags.filter(tag =>
+            tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            tag.id.toString().includes(searchTerm)
+        );
+
+        const tagList = document.getElementById('tag-delete-list');
+        tagList.innerHTML = '';
+
+        filteredTags.forEach(tag => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="selectedTag" 
+                  id="tag-${tag.id}" value="${tag.id}">
+            <label class="form-check-label" for="tag-${tag.id}">
+              ${tag.name} (ID: ${tag.id})
+            </label>
+          </div>
+        `;
+            li.style.padding = '8px';
+            tagList.appendChild(li);
+        });
+    }
+
+    async function handleDeleteTag() {
+        const selected = document.querySelector('input[name="selectedTag"]:checked');
+        if (!selected) return;
+
+        if (!confirm('Are you sure you want to delete this tag? This action cannot be undone.')) return;
+
+        try {
+            const response = await fetch(`/api/tags/${selected.value}`, { method: 'DELETE' });
+
+            if (response.ok) {
+                alert('Tag deleted successfully!');
+                document.querySelectorAll('[id^="input-tags-"]').forEach(input => {
+                    input.dispatchEvent(new Event('input'));
+                });
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (err) {
+            alert('Failed to delete tag. Please try again.');
+        }
+    }
+
+    // RENAME
+    async function loadTagsForRename() {
+        try {
+            const response = await fetch('/api/tags');
+            allTags = await response.json();
+            document.getElementById('rename-tag-form').style.display = 'block';
+            updateRenameTagList('');
+            document.getElementById('renamed-tag-name').value = '';
+        } catch (err) {
+            console.error('Error fetching tags:', err);
+            alert('Failed to load tags');
+        }
+    }
+
+    function updateRenameTagList(searchTerm) {
+        const filteredTags = allTags.filter(tag =>
+            tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            tag.id.toString().includes(searchTerm)
+        );
+
+        const tagList = document.getElementById('tag-rename-list');
+        tagList.innerHTML = '';
+
+        filteredTags.forEach(tag => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="selectedRenameTag" 
+                  id="tag-rename-${tag.id}" value="${tag.id}">
+            <label class="form-check-label" for="tag-rename-${tag.id}">
+              ${tag.name} (ID: ${tag.id})
+            </label>
+          </div>
+        `;
+            li.style.padding = '8px';
+            tagList.appendChild(li);
+        });
+    }
+
+    async function handleRenameTag() {
+        const selected = document.querySelector('input[name="selectedRenameTag"]:checked');
+        const newName = document.getElementById('renamed-tag-name').value.trim();
+
+        if (!selected || !newName) {
+            alert('Please select a tag and enter a new name');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to rename this tag? This will update all associated books.')) return;
+
+        try {
+            const response = await fetch(`/api/tags/${selected.value}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName })
+            });
+
+            if (response.ok) {
+                alert('Tag renamed successfully!');
+                document.querySelectorAll('[id^="input-tags-"]').forEach(input => {
+                    input.dispatchEvent(new Event('input'));
+                });
+                setTimeout(() => location.reload(), 500);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (err) {
+            alert('Failed to rename tag. Please try again.');
+        }
+    }
+
+    // VIEW
+    async function loadAllTagsForView() {
+        try {
+            const response = await fetch('/api/tags');
+            allTags = await response.json();
+            document.getElementById('view-tags-form').style.display = 'block';
+            updateAllTagsList();
+        } catch (err) {
+            console.error('Error fetching tags:', err);
+            alert('Failed to load tags');
+        }
+    }
+
+    function updateAllTagsList() {
+        const tagList = document.getElementById('all-tags-list');
+        tagList.innerHTML = '';
+
+        const sortedTags = [...allTags].sort((a, b) => a.name.localeCompare(b.name));
+
+        sortedTags.forEach(tag => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${tag.name}</span>
+                <small class="text-muted">ID: ${tag.id}</small>
+            </div>
+        `;
+            li.style.padding = '8px';
+            li.style.borderBottom = '1px solid #444';
+            tagList.appendChild(li);
+        });
+    }
+
+
+    // Initialize event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('tag-manager-btn').addEventListener('click', () => {
+            document.getElementById('tag-manager-popup').style.display = 'block';
+            document.getElementById('popup-backdrop').style.display = 'block';
+            showTagManager('delete');
+        });
+
+        document.getElementById('tag-search').addEventListener('input', (e) =>
+            updateDeleteTagList(e.target.value));
+        document.getElementById('tag-rename-search').addEventListener('input', (e) =>
+            updateRenameTagList(e.target.value));
+    });
+</script>
+
+<style>
+    .dark-input {
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    .dark-input:focus {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    .form-check-label {
+        color: darkgrey;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked+.form-check-label {
+        color: white;
+    }
+
+    #tag-manager-popup {
+        background-color: #2c2c2c;
+        border: 1px solid #555;
+        padding: 20px;
+    }
+
+    #tag-delete-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    #tag-manager-content input::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    #tag-manager-content input::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    #tag-manager-content input:-ms-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    #tag-manager-content input::-moz-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    #all-tags-list li:hover {
+        background-color: #373737;
+    }
+
+    #all-tags-list {
+        border: 1px solid #444;
+        border-radius: 4px;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #2e2e2e;
+            color: #f1f1f1;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #ffc107;
+        }
+
+        .card {
+            border-radius: 15px;
+            transition: transform 0.2s;
+            border: 1px solid #ffc107;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .table-dark {
+            --bs-table-bg: #1a1a1a;
+            --bs-table-striped-bg: #222;
+            --bs-table-hover-bg: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table-dark th {
+            background-color: #333;
+        }
+
+        .report-form .form-control,
+        .report-form .form-select,
+        .report-form .form-control:focus,
+        .report-form .form-select:focus {
+            background-color: #1a1a1a;
+            border-color: #444;
+            color: #fff;
+        }
+
+        .report-form .form-control:focus,
+        .report-form .form-select:focus {
+            border-color: lightgray;
+            box-shadow: 0 0 0 0.25rem rgba(98, 97, 93, 0.25);
+        }
+
+        .report-form .form-label {
+            color: #f1f1f1 !important;
+        }
+
+        .report-form ::placeholder {
+            color: #6c757d !important;
+        }
+
+        .report-form .card-title {
+            border-bottom: 2px solid #ffc107;
+            padding-bottom: 0.5rem;
+        }
+
+        .btn-report {
+            transition: all 0.3s ease;
+        }
+
+        .btn-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 0.25rem rgba(98, 97, 93, 0.25);
+        }
+
+        .input-group .form-control,
+        .input-group .form-select {
+            background-color: #1a1a1a;
+            border-color: #444;
+            color: #fff;
+        }
+
+        .input-group .form-control:focus,
+        .input-group .form-select:focus {
+            border-color: lightgray;
+            box-shadow: 0 0 0 0.25rem rgba(98, 97, 93, 0.25);
+        }
+
+        .input-group .form-select {
+            width: auto;
+            flex: 0 0 180px;
+        }
+
+        .modal-content {
+            border: 1px solid #ffc107;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <div class="container mt-4" style="padding-top: 56px;">
+            <h1 class="mb-4">Reports</h1>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-dark text-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Sales</h5>
+                            <h2 id="totalSales" class="card-text">$0.00</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-dark text-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Orders</h5>
+                            <h2 id="totalOrders" class="card-text">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-dark text-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Books Sold</h5>
+                            <h2 id="totalBooksSold" class="card-text">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generation Form -->
+            <div class="card bg-dark text-light mb-4 report-form">
+                <div class="card-body">
+                    <h5 class="card-title">Generate New Report</h5>
+                    <form id="reportForm" onsubmit="return submitReport(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Recipient Email</label>
+                            <input type="hidden" name="username" value="<%= user.username %>">
+                            <input type="email" class="form-control" name="email" placeholder="Enter recipient email"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select" name="topic" required>
+                                <option value="">Select Report Type</option>
+                                <option>Sales Summary</option>
+                                <option>Inventory Analysis</option>
+                                <option>User Activity</option>
+                                <option>Financial Overview</option>
+                                <option>Bug Report</option>
+                                <option>Feature Suggestion</option>
+                                <option>Feedback</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Report Details</label>
+                            <textarea class="form-control" name="message" rows="4" placeholder="Enter report details..."
+                                required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-file-earmark-pdf"></i> Generate Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Generated Reports -->
+            <div class="row mb-3">
+                <h3 class="mb-3">Generated Reports</h3>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-dark text-light"
+                            placeholder="Search by Type or Generated By..." id="searchInput">
+                        <select class="form-select bg-dark text-light" id="searchType">
+                            <option value="type">Search by Type</option>
+                            <option value="generated_by">Search by Generated By</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive mb-4">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>Generated By</th>
+                            <th>Recipient</th>
+                            <th>Type</th>
+                            <th>Details</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsList">
+                        <tr>
+                            <td colspan="6" class="text-center">Loading reports...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            let allReports = [];
+
+            function loadReports() {
+                fetch('/api/reports')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data) {
+                            allReports = data.data;
+                            filterReports();
+                        }
+                    })
+                    .catch(error => console.error('Error loading reports:', error));
+            }
+
+            function filterReports() {
+                const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+                const searchType = document.getElementById('searchType').value;
+
+                const filtered = allReports.filter(report => {
+                    if (!searchTerm) return true;
+
+                    if (searchType === 'type') {
+                        return report.topic.toLowerCase().includes(searchTerm);
+                    }
+
+                    if (searchType === 'generated_by') {
+                        return report.name.toLowerCase().includes(searchTerm);
+                    }
+
+                    return true;
+                });
+
+                renderReports(filtered);
+            }
+
+            function renderReports(reports) {
+                const tbody = document.getElementById('reportsList');
+                tbody.innerHTML = '';
+
+                if (reports.length > 0) {
+                    reports.forEach(report => {
+                        const row = `
+                            <tr style="cursor: pointer;" 
+                                onclick="showReportDetails('${report.id}')"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#reportModal">
+                                <td>${report.name}</td>
+                                <td>${report.email}</td>
+                                <td>${report.topic}</td>
+                                <td>${report.message.substring(0, 40)}</td>
+                                <td>${new Date(report.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" 
+                                        onclick="event.stopPropagation(); deleteReport('${report.id}')">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">No matching reports found</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // Update event listeners
+            document.getElementById('searchInput').addEventListener('input', filterReports);
+            document.getElementById('searchType').addEventListener('change', filterReports);
+
+            function showReportDetails(reportId) {
+                const id = Number(reportId);
+                const report = allReports.find(r => r.id === id);
+
+                if (!report) {
+                    console.error('Report not found:', reportId);
+                    return;
+                }
+
+                console.log('Showing report:', report); // Debugging
+
+                document.getElementById('modal-generated-by').textContent = report.name;
+                document.getElementById('modal-recipient').textContent = report.email;
+                document.getElementById('modal-type').textContent = report.topic;
+                document.getElementById('modal-date').textContent = new Date(report.created_at).toLocaleDateString();
+                document.getElementById('modal-message').textContent = report.message;
+            }
+
+
+            // Submit new report
+            function submitReport(event) {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+
+                fetch('/api/reports', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: formData.get('username'),
+                        email: formData.get('email'),
+                        topic: formData.get('topic'),
+                        message: formData.get('message')
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            setTimeout(() => {
+                                location.reload();
+                            }, 500);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Delete report
+            function deleteReport(reportId) {
+                if (confirm('Are you sure you want to delete this report?')) {
+                    fetch(`/api/reports/${reportId}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                allReports = allReports.filter(report => report.id !== reportId);
+                                filterReports();
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 500);
+                            }
+                        });
+                }
+            }
+
+            // Initial load
+            loadReports();
+
+            // Fetch report data
+            fetch('/api/orders/report/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update stats
+                        document.getElementById('totalSales').textContent =
+                            `$${Number(data.data.total_sales).toFixed(2)}`;
+                        document.getElementById('totalOrders').textContent =
+                            data.data.total_orders;
+                        document.getElementById('totalBooksSold').textContent =
+                            data.data.total_books_sold;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading report stats:', error);
+                    document.getElementById('totalSales').textContent = '$0.00';
+                    document.getElementById('totalOrders').textContent = '0';
+                    document.getElementById('totalBooksSold').textContent = '0';
+                });
+        </script>
+
+        <!-- Report Details Modal -->
+        <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="reportModalLabel">Report Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Generated By:</h6>
+                                <p id="modal-generated-by" class="text-warning"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Recipient:</h6>
+                                <p id="modal-recipient" class="text-warning"></p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Type:</h6>
+                                <p id="modal-type" class="text-warning"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Date:</h6>
+                                <p id="modal-date" class="text-warning"></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Full Details:</h6>
+                            <div id="modal-message" class="p-3 rounded" style="min-height: 150px; background-color: #1a1a1a;"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

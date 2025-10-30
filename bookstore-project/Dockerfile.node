@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup -u 1001
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Copy package.json first
+COPY --chown=1001:1001 /backend/package*.json ./
+RUN npm ci --only=production
+RUN mkdir -p /app/public/images && chown -R appuser:appgroup /app/public
+
+COPY --chown=1001:1001 admin-frontend/ /app/admin-frontend
+COPY --chown=1001:1001 backend/        /app/backend
+COPY --chown=1001:1001 frontend_ejs/   /app/frontend_ejs
+COPY --chown=1001:1001 public/         /app/public  
+USER 1001
+EXPOSE 3000
+CMD ["node", "backend/server.js"]

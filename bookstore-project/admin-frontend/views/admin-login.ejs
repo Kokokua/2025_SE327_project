@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Admin Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2e2e2e;
+      color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .main-content {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-image-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .login-image {
+      width: 300px;
+      height: auto;
+    }
+
+    .login-box {
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      padding: 50px 25px;
+      max-width: 380px;
+      min-height: 300px;
+      text-align: center;
+      background-color: #444;
+      border: 1px solid #666;
+      border-radius: 8px;
+    }
+
+    .login-box form input {
+      display: block;
+      width: 100%;
+      background-color: #222 !important;
+      color: #fff !important;
+      border: 1px solid #444 !important;
+      border-radius: 20px;
+      padding: 12px 15px;
+      margin: 15px 0;
+      transition: all 0.3s ease;
+    }
+
+    .login-box form input:focus {
+      background-color: #333 !important;
+      border-color: #666 !important;
+      box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+      outline: none;
+    }
+
+    .login-box form input::placeholder {
+      color: rgba(255, 255, 255, 0.7) !important;
+      opacity: 1 !important;
+    }
+
+    .login-box form input::-webkit-input-placeholder {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .login-box form input::-moz-placeholder {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .login-box form input:-ms-input-placeholder {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      background-color: #a24d4d;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8b3d3d;
+    }
+
+    .login-box button:hover {
+      background-color: #999 !important;
+    }
+
+    @media (max-width: 768px) {
+      .login-container {
+        width: 100%;
+        max-width: 90%;
+        padding: 30px;
+      }
+
+      .login-image {
+        width: 150px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .login-image {
+        width: 120px;
+      }
+
+      .login-box {
+        padding: 25px 15px;
+        min-height: 280px;
+      }
+
+      form input,
+      button {
+        margin: 10px 0;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+      <div class="main-content">
+        <div class="login-container">
+          <div class="login-image-container">
+            <img src="/images/Icons/Logo_White.png" alt="Login Image" class="login-image">
+          </div>
+          <div class="login-box">
+            <h2 class="login-title" style="color: #ffc107;">LOGIN</h2>
+            <% if (error) { %>
+              <p style="color:red;">
+                <%= error %>
+              </p>
+              <% } %>
+            <form method="POST" action="/admin/login">
+              <input type="text" name="username" placeholder="Username">
+              <input type="password" name="password" placeholder="Password">
+              <button type="submit" style="background-color: #666; transition: background-color 0.3s ease;">Login</button>
+            </form>
+          </div>
+        </div>
+      </div>
+</body>
+
+</html>

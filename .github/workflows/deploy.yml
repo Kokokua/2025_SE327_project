@@ -1,0 +1,105 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "production", "main" ]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set file permissions
+        run: |
+          find . -type d -exec chmod 755 {} \;
+          find . -type f -exec chmod 644 {} \;
+          chmod -R 755 .github bookstore-project
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Verify directories
+        run: |
+          ls -la bookstore-project/
+          [ -d bookstore-project/public ] || exit 1
+          [ -d bookstore-project/backend ] || exit 1
+
+      - name: Debug Files
+        run: ls -la
+
+      - name: Build and push Node.js image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./bookstore-project
+          file: bookstore-project/Dockerfile.node 
+          push: true
+          tags: ghcr.io/panuwat-lab/bookstore:latest
+
+      - name: Prepare filesystem on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USER }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            set -ex
+            sudo mkdir -p /data/bookstore
+            sudo chown -R 1001:1001 /data/bookstore
+            sudo chmod -R 755 /data/bookstore
+
+      # Write the SSH key to a file so that rsync can use it
+      - name: Set up SSH key for rsync
+        run: |
+          echo "${{ secrets.AWS_EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: Rsync project files to EC2
+        run: |
+          # Create target folder on remote using sudo
+          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "sudo mkdir -p /data/bookstore-new"
+          # Use rsync with remote sudo to overcome permission issues
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i key.pem" --rsync-path="sudo rsync" bookstore-project/ ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/data/bookstore-new/
+          # Optionally adjust ownership/permissions after the transfer
+          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "sudo chown -R 1001:1001 /data/bookstore-new && sudo chmod -R 755 /data/bookstore-new"
+
+
+      - name: Atomic deployment switch
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USER }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            set -ex
+            sudo rm -rf /data/bookstore-old
+            [ -d /data/bookstore ] && sudo mv /data/bookstore /data/bookstore-old
+            sudo mv /data/bookstore-new /data/bookstore
+            sudo chown -R 1001:1001 /data/bookstore
+            sudo chmod -R 755 /data/bookstore
+
+      - name: Start containers
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USER }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            set -ex
+            cd /data/bookstore
+            docker compose down -v --remove-orphans
+            docker compose up -d --force-recreate
+            docker compose ps
+            curl -I localhost:80

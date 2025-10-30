@@ -1,0 +1,149 @@
+<div class="mb-3 position-relative">
+    <input class="form-control" id="input-tags-<%= suffix %>" placeholder="Search">
+    <%= typeof value !=='undefined' ? _.escape(value) : '' %></input>
+        <ul id="tag-suggestions-<%= suffix %>" class="list-group mt-1 light-dropdown"></ul>
+</div>
+
+<style>
+    .light-dropdown {
+        position: absolute;
+        z-index: 1001;
+        display: none;
+        max-height: 150px;
+        overflow-y: auto;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0;
+        width: 100%;
+        list-style: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .light-dropdown li {
+        padding: 6px 12px;
+        cursor: pointer;
+        color: #666;
+        border-bottom: 1px solid #eee;
+    }
+
+    .light-dropdown li:hover {
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    input[id^="input-tags-"] {
+        background-color: #fff !important;
+        color: #333 !important;
+        border: 1px solid #ced4da !important;
+        height: 38px !important;
+        margin-top: 14px;
+        width: 100%;
+        min-width: 300px;
+        max-width: 800px;
+    }
+
+    input[id^="input-tags-"]:focus {
+        background-color: #fff !important;
+        border-color: #3a3c0f !important;
+        box-shadow: 0 0 0 0.25rem rgba(97, 82, 3, 0.25) !important;
+    }
+
+    input[id^="input-tags-"]::placeholder {
+        color: #6c757d !important;
+        opacity: 1 !important;
+    }
+
+    input[id^="input-tags-"]::-webkit-input-placeholder {
+        color: #6c757d !important;
+    }
+
+    input[id^="input-tags-"]::-moz-placeholder {
+        color: #6c757d !important;
+    }
+
+    input[id^="input-tags-"]:-ms-input-placeholder {
+        color: #6c757d !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const tagInput = document.getElementById("input-tags-<%= suffix %>");
+        const suggestionsList = document.getElementById("tag-suggestions-<%= suffix %>");
+        let allTags = [];
+
+        try {
+            const res = await fetch('/api/tags');
+            const data = await res.json();
+            allTags = data.map(tag => tag.name);
+        } catch (err) {
+            console.error("Failed to fetch tags:", err);
+        }
+
+        tagInput.addEventListener("input", () => {
+            const currentInput = tagInput.value;
+            const cursorPosition = tagInput.selectionStart;
+
+            const splitRegex = /[\s,]+/;
+            const selectedTags = currentInput.split(splitRegex)
+                .map(tag => tag.trim())
+                .filter(tag => tag.length > 0);
+
+            const selectedTagsLower = selectedTags.map(tag => tag.toLowerCase());
+            const lastTag = selectedTags.length > 0 ? selectedTags[selectedTags.length - 1].toLowerCase() : '';
+
+            const textBeforeCursor = currentInput.slice(0, cursorPosition);
+            const activeTag = textBeforeCursor.split(splitRegex).pop().trim().toLowerCase();
+
+            const filteredSuggestions = allTags.filter(tag => {
+                const tagLower = tag.toLowerCase();
+                return tagLower.startsWith(activeTag) && 
+                       !selectedTagsLower.includes(tagLower);
+            });
+
+            suggestionsList.innerHTML = '';
+
+            if (activeTag && filteredSuggestions.length > 0) {
+                filteredSuggestions.forEach(tag => {
+                    const li = document.createElement("li");
+                    li.textContent = tag;
+                    li.classList.add("suggestion-item");
+                    li.addEventListener("mousedown", (e) => {
+                        e.preventDefault(); 
+                        
+                        const newTags = [...selectedTags];
+                        if (newTags.length > 0) {
+                            newTags[newTags.length - 1] = tag;
+                        } else {
+                            newTags.push(tag);
+                        }
+                        
+                        tagInput.value = newTags.join(' ');
+                        suggestionsList.style.display = 'none';
+                        tagInput.focus();
+                    });
+                    suggestionsList.appendChild(li);
+                });
+
+                suggestionsList.style.display = 'block';
+            } else {
+                suggestionsList.style.display = 'none';
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!suggestionsList.contains(e.target) && e.target !== tagInput) {
+                suggestionsList.style.display = 'none';
+            }
+        });
+    });
+
+    function handleSearch() {
+        const input = document.getElementById('input-tags-searchbar');
+        // Encode the input value for URL safety
+        const topic = encodeURIComponent(input.value);
+        // Redirect to the URL with the dynamic topic parameter
+        window.location.href = `/general?predefined=false&topic=${topic}`;
+    }
+</script>

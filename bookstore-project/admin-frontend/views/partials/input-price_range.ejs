@@ -1,0 +1,39 @@
+<div class="mb-3">
+    <label for="input-price_range" class="form-label">Price</label>
+    <div class="d-flex justify-content-between">
+        <input type="number" id="input-price-min-<%= suffix %>" class="form-control me-2" placeholder="Min" min="0" value="<%= typeof value !== 'undefined' ? _.escape(value) : '' %>">
+        <span class="d-flex align-items-center">to</span>
+        <input type="number" id="input-price-max-<%= suffix %>" class="form-control ms-2" placeholder="Max" min="0" value="<%= typeof value !== 'undefined' ? _.escape(value) : '' %>">
+    </div>
+</div>
+
+<style>
+    input[id^="input-price-"] {
+        background-color: #222 !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    input[id^="input-price-"]:focus {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        box-shadow: 0 0 0 0.25rem rgba(102, 102, 102, 0.25) !important;
+    }
+
+    input[id^="input-price-"]::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+        opacity: 1 !important;
+    }
+
+    input[id^="input-price-"]::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-price-"]::-moz-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    input[id^="input-price-"]:-ms-input-placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+</style>

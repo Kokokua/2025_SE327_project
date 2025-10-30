@@ -1,22 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import api from '@/services/api'
+import { booksService } from '@/services/booksService'
 
 export const useBooksStore = defineStore('books', () => {
-  // State
   const books = ref([])
-  const currentBook = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
-  // Actions
   async function fetchBooks(filters = {}) {
     loading.value = true
     error.value = null
-    
     try {
-      const response = await api.get('/api/books', { params: filters })
-      books.value = response.data
+      books.value = await booksService.getBooks(filters)
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch books'
     } finally {
@@ -27,26 +22,21 @@ export const useBooksStore = defineStore('books', () => {
   async function fetchBook(id) {
     loading.value = true
     error.value = null
-    
     try {
-      const response = await api.get(`/api/books/${id}`)
-      currentBook.value = response.data
+      return await booksService.getBook(id)
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch book'
+      throw err
     } finally {
       loading.value = false
     }
   }
 
   return {
-    // State
     books,
-    currentBook,
     loading,
     error,
-    // Actions
     fetchBooks,
-    fetchBook,
+    fetchBook
   }
 })
-

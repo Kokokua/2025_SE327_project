@@ -2,78 +2,59 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useCartStore = defineStore('cart', () => {
-  // State
-  const items = ref(JSON.parse(localStorage.getItem('cart_items') || '[]'))
+  const items = ref(JSON.parse(localStorage.getItem('cart') || '[]'))
 
-  // Getters
-  const totalItems = computed(() => {
-    return items.value.reduce((total, item) => total + item.quantity, 0)
-  })
+  const totalItems = computed(() => 
+    items.value.reduce((sum, item) => sum + item.quantity, 0)
+  )
 
-  const totalPrice = computed(() => {
-    return items.value.reduce((total, item) => {
-      const price = item.book.discountedPrice || item.book.price
-      return total + (price * item.quantity)
-    }, 0)
-  })
+  const totalPrice = computed(() => 
+    items.value.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0)
+  )
 
-  const isEmpty = computed(() => items.value.length === 0)
-
-  // Actions
-  function addItem(book, quantity = 1) {
-    const existingItem = items.value.find(item => item.book.id === book.id)
-    
+  function addToCart(book, quantity = 1) {
+    const existingItem = items.value.find(item => item.id === book.id)
     if (existingItem) {
       existingItem.quantity += quantity
     } else {
-      items.value.push({
-        book,
-        quantity
-      })
+      items.value.push({ ...book, quantity })
     }
-    
-    saveToLocalStorage()
+    saveCart()
   }
 
-  function removeItem(bookId) {
-    items.value = items.value.filter(item => item.book.id !== bookId)
-    saveToLocalStorage()
+  function removeFromCart(bookId) {
+    items.value = items.value.filter(item => item.id !== bookId)
+    saveCart()
   }
 
   function updateQuantity(bookId, quantity) {
-    const item = items.value.find(item => item.book.id === bookId)
-    
+    const item = items.value.find(item => item.id === bookId)
     if (item) {
       if (quantity <= 0) {
-        removeItem(bookId)
+        removeFromCart(bookId)
       } else {
         item.quantity = quantity
-        saveToLocalStorage()
+        saveCart()
       }
     }
   }
 
   function clearCart() {
     items.value = []
-    saveToLocalStorage()
+    saveCart()
   }
 
-  function saveToLocalStorage() {
-    localStorage.setItem('cart_items', JSON.stringify(items.value))
+  function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(items.value))
   }
 
   return {
-    // State
     items,
-    // Getters
     totalItems,
     totalPrice,
-    isEmpty,
-    // Actions
-    addItem,
-    removeItem,
+    addToCart,
+    removeFromCart,
     updateQuantity,
-    clearCart,
+    clearCart
   }
 })
-

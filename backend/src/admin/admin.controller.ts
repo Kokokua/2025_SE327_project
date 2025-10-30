@@ -13,6 +13,7 @@ import { JwtAuthGuard, RolesGuard } from '../common/guards';
 import { Roles } from '../common/decorators';
 import { UsersService } from '../users/users.service';
 import { OrdersService } from '../orders/orders.service';
+import { BooksService } from '../books/books.service';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -23,6 +24,7 @@ export class AdminController {
   constructor(
     private readonly usersService: UsersService,
     private readonly ordersService: OrdersService,
+    private readonly booksService: BooksService,
   ) {}
 
   @Get('users')
@@ -51,6 +53,23 @@ export class AdminController {
   @ApiOperation({ summary: 'Get all orders (Admin only)' })
   async getAllOrders() {
     return this.ordersService.findAll();
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Get aggregated stats (Admin only)' })
+  async stats() {
+    const [usersTotal, booksTotal, report] = await Promise.all([
+      this.usersService.countAll(),
+      this.booksService.countAll(),
+      this.ordersService.getReportStats(),
+    ]);
+    return {
+      usersTotal,
+      booksTotal,
+      ordersTotal: report.total_orders,
+      totalSales: report.total_sales,
+      totalBooksSold: report.total_books_sold,
+    };
   }
 }
 

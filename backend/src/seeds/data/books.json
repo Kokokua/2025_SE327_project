@@ -1,0 +1,57 @@
+[
+  {
+    "title": "The Great Gatsby",
+    "seller": "ClassicBooks Co.",
+    "description": "A story of the Jazz Age",
+    "image": "1.jpg",
+    "price": 24.99,
+    "discountedPrice": 19.99,
+    "tags": ["Classic"]
+  },
+  {
+    "title": "Python for Beginners",
+    "seller": "TechBooks Ltd",
+    "description": "Learn Python programming",
+    "image": "2.jpg",
+    "price": 39.99,
+    "discountedPrice": null,
+    "tags": ["Tech"]
+  },
+  {
+    "title": "Master Chef Recipes",
+    "seller": "Foodie Publications",
+    "description": "Culinary delights for home chefs",
+    "image": "3.jpg",
+    "price": 29.99,
+    "discountedPrice": 24.99,
+    "tags": ["Cooking"]
+  },
+  {
+    "title": "The Hobbit",
+    "seller": "Fantasy Books Inc",
+    "description": "Epic fantasy adventure",
+    "image": "4.png",
+    "price": 29.99,
+    "discountedPrice": 24.99,
+    "tags": ["Fantasy"]
+  },
+  {
+    "title": "The Martian",
+    "seller": "Sci-Fi Books Co",
+    "description": "Survival story on Mars",
+    "image": "5.jpg",
+    "price": 27.95,
+    "discountedPrice": null,
+    "tags": ["Sci-Fi"]
+  },
+  {
+    "title": "Atomic Habits",
+    "seller": "SelfHelp Publications",
+    "description": "Build good habits framework",
+    "image": "7.jpg",
+    "price": 28.5,
+    "discountedPrice": null,
+    "tags": ["Self-Help"]
+  }
+]
+

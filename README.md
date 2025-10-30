@@ -12,18 +12,20 @@ This project involves reengineering a web store from SE262 using a completely di
 ## Technology Stack
 
 ### Old Stack (SE262)
+- **UI Framework:** Custom CSS
 - **Frontend:** EJS + Vanilla JavaScript
 - **Backend:** Express.js (Node.js)
 - **Database:** MySQL
-- **UI:** Custom CSS
 
-### New Stack (Current Project)
-- **Frontend:** Vue.js 3 + Pinia + Vue Router + Vuetify
+### New Stack (Current Project) ✅
+- **UI Framework:** Tailwind CSS 3
+- **Frontend:** Vue.js 3 + Pinia + Vue Router
 - **Backend:** NestJS (TypeScript) + TypeORM + Passport JWT
-- **Database:** MySQL
-- **UI Framework:** Vuetify
+- **Database:** PostgreSQL 15
 
 ## Project Structure
+
+**Main Branch Structure:**
 ```
 term-project-production/
 ├── README.md                          # Main project documentation
@@ -43,16 +45,27 @@ term-project-production/
 ├── docs/                              # Project documentation
 │   ├── technology-survey.md           # ✅ Technology comparison
 │   ├── comparison-tables.md           # ✅ Quick reference tables
-│   ├── implementation-notes.md        # Implementation tracking
-│   └── final-report.pdf               # Final report (to be added)
+│   └── implementation-notes.md        # Implementation tracking
 │
 └── sonar-project.properties           # SonarQube configuration
 ```
 
-**Development Branches:**
-- `backend` - NestJS backend development
-- `frontend` - Vue.js 3 frontend development
-- `chore/ci` - CI/CD configurations
+**Branch Model:**
+- **`main`** - Main branch with documentation and legacy code
+- **`backend`** - NestJS backend implementation
+- **`frontend`** - Vue.js 3 frontend implementation
+- **`chore/ci`** - CI/CD configurations
+
+**How to Access Code:**
+```bash
+# Backend code (NestJS + PostgreSQL)
+git checkout backend
+cd backend
+
+# Frontend code (Vue 3 + Tailwind CSS)
+git checkout frontend
+cd frontend
+```
 
 ## Progress Tracking
 

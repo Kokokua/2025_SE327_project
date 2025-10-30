@@ -18,6 +18,7 @@ import { BooksModule } from './books/books.module';
 import { TagsModule } from './tags/tags.module';
 import { OrdersModule } from './orders/orders.module';
 import { AdminModule } from './admin/admin.module';
+import { ReportsModule } from './reports/reports.module';
 import { JwtAuthGuard } from './common/guards';
 
 @Module({
@@ -49,6 +50,7 @@ import { JwtAuthGuard } from './common/guards';
     TagsModule,
     OrdersModule,
     AdminModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
   providers: [

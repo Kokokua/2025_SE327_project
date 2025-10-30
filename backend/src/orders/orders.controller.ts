@@ -29,6 +29,14 @@ export class OrdersController {
     return this.ordersService.findByUserId(user.id);
   }
 
+  @Get('all')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Get all orders (Admin only)' })
+  async getAllOrders() {
+    return this.ordersService.findAll();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get order by ID' })
   async findById(@Param('id', ParseIntPipe) id: number) {
@@ -62,6 +70,22 @@ export class OrdersController {
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.ordersService.delete(id);
     return { message: 'Order deleted successfully' };
+  }
+
+  @Get('stats')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Get order stats (Admin only)' })
+  async stats() {
+    return this.ordersService.getOrderStats();
+  }
+
+  @Get('report/stats')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Get summary report stats (Admin only)' })
+  async reportStats() {
+    return this.ordersService.getReportStats();
   }
 }
 

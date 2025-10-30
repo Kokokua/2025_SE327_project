@@ -63,5 +63,35 @@ export class OrdersService {
     const order = await this.findById(id);
     await this.orderRepository.remove(order);
   }
+
+  async getOrderStats(): Promise<{ total: number; recent: Array<{ id: number; userEmail: string; totalAmount: number; createdAt: Date }> }> {
+    const total = await this.orderRepository.count();
+    const recentOrders = await this.orderRepository.find({
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+
+    const recent = recentOrders.map((o) => ({
+      id: o.id,
+      userEmail: o.user?.email ?? '',
+      totalAmount: Number(o.totalAmount),
+      createdAt: o.createdAt,
+    }));
+
+    return { total, recent };
+  }
+
+  async getReportStats(): Promise<{ total_orders: number; total_sales: number; total_books_sold: number }> {
+    const orders = await this.orderRepository.find();
+    const total_orders = orders.length;
+    const total_sales = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+    const total_books_sold = orders.reduce((sum, o) => {
+      const items = (o.items || []) as Array<{ quantity: number }>;
+      return sum + items.reduce((s, it) => s + Number(it.quantity || 0), 0);
+    }, 0);
+
+    return { total_orders, total_sales, total_books_sold };
+  }
 }
 

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Between } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Book } from './entities/book.entity';
 import { Tag } from '../tags/entities/tag.entity';
 import { CreateBookDto, UpdateBookDto } from './dto';
@@ -56,13 +56,17 @@ export class BooksService {
     return book;
   }
 
+  async countAll(): Promise<number> {
+    return this.bookRepository.count();
+  }
+
   async create(createBookDto: CreateBookDto): Promise<Book> {
     const { tagIds, ...bookData } = createBookDto;
 
     const book = this.bookRepository.create(bookData);
 
     if (tagIds && tagIds.length > 0) {
-      book.tags = await this.tagRepository.findByIds(tagIds);
+      book.tags = await this.tagRepository.findBy({ id: In(tagIds) });
     }
 
     return this.bookRepository.save(book);
@@ -76,7 +80,7 @@ export class BooksService {
 
     if (tagIds !== undefined) {
       book.tags = tagIds.length > 0
-        ? await this.tagRepository.findByIds(tagIds)
+        ? await this.tagRepository.findBy({ id: In(tagIds) })
         : [];
     }
 

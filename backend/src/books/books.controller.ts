@@ -44,6 +44,16 @@ export class BooksController {
     return this.booksService.findById(id);
   }
 
+  @Get('total')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get total number of books (Admin only)' })
+  async total() {
+    const total = await this.booksService.countAll();
+    return { total };
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')

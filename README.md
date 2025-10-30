@@ -24,39 +24,89 @@ This project involves reengineering a web store from SE262 using a completely di
 - **UI Framework:** Vuetify
 
 ## Project Structure
-- `/bookstore-project` - Original SE262 bookstore project
-  - `/backend` - Express.js backend
-  - `/frontend_ejs` - EJS frontend
-  - `/admin-frontend` - Admin panel
-- `/new-backend` - NestJS backend (to be implemented)
-- `/new-frontend` - Vue.js 3 frontend (to be implemented)
-- `/docs` - Documentation and reports
-- `/presentation` - Presentation materials
+```
+2025_SE327_project/
+├── README.md                          # Main project documentation
+├── .gitignore                         # Git ignore rules
+│
+├── old-project/                       # SE262 original project
+│   ├── bookstore-project/
+│   │   ├── backend/                   # Express.js backend
+│   │   ├── frontend_ejs/              # EJS templates
+│   │   ├── admin-frontend/            # Admin panel
+│   │   └── public/                    # Static assets
+│   └── README.md                      # Old project documentation
+│
+├── new-project/                       # Reengineered project
+│   ├── backend/                       # NestJS backend (to be implemented)
+│   ├── frontend/                      # Vue.js 3 frontend (to be implemented)
+│   └── README.md                      # Setup instructions
+│
+├── docs/                              # Project documentation
+│   ├── technology-survey.md           # ✅ Complete technology comparison
+│   ├── comparison-tables.md           # ✅ Quick reference tables
+│   ├── implementation-notes.md        # Implementation tracking
+│   └── final-report.pdf               # Final report (to be added)
+│
+├── presentation/                      # Presentation materials
+│   ├── slides.pdf                     # Presentation slides (to be added)
+│   └── demo-video.mp4                 # Demo video (optional)
+│
+└── bookstore-project/                 # ⚠️ To be moved to old-project/
+    └── (Original project files)
+```
+
+**Note:** The `bookstore-project` folder should be moved into `old-project/` but encountered file lock issues. Will be reorganized in next session.
 
 ## Progress Tracking
+
+### Phase 1: Technology Survey & Planning ✅
 - [x] Project setup and Git repository initialization
-- [ ] Technology Survey & Comparison
-  - [ ] Frontend frameworks comparison (Vue.js, React, Svelte)
-  - [ ] Backend frameworks comparison (NestJS, FastAPI, Django)
-- [ ] Backend Development (NestJS)
-  - [ ] Project setup and core configuration
-  - [ ] Authentication module (JWT)
-  - [ ] Books module
-  - [ ] Users module
-  - [ ] Orders module
-  - [ ] Admin module
-- [ ] Frontend Development (Vue.js 3)
-  - [ ] Project setup and core configuration
-  - [ ] API services layer
-  - [ ] Pinia stores (auth, cart, books)
-  - [ ] Common components
-  - [ ] Public pages (Home, Book Detail, Cart)
-  - [ ] Authentication pages
-  - [ ] User pages (Profile, Orders)
-  - [ ] Admin dashboard
-- [ ] Integration & Testing
-- [ ] Documentation & Report
-- [ ] Presentation Preparation
+- [x] Organize project structure
+- [x] Technology Survey & Comparison
+  - [x] Frontend frameworks comparison (Vue.js, React, Svelte)
+  - [x] Backend frameworks comparison (NestJS, FastAPI, Django)
+  - [x] Create weighted scoring tables
+  - [x] Document selection rationale
+- [x] Create comprehensive documentation
+  - [x] Technology survey report
+  - [x] Comparison tables
+  - [x] Implementation notes template
+
+### Phase 2: Backend Development (NestJS) - Next
+- [ ] Project setup and core configuration
+- [ ] Database schema and TypeORM setup
+- [ ] Authentication module (JWT)
+- [ ] Books module (CRUD, search, filter)
+- [ ] Users module
+- [ ] Orders module
+- [ ] Tags module
+- [ ] Admin module
+- [ ] Swagger documentation
+- [ ] API testing
+
+### Phase 3: Frontend Development (Vue.js 3)
+- [ ] Project setup and core configuration
+- [ ] API services layer
+- [ ] Pinia stores (auth, cart, books, orders)
+- [ ] Common components (Navbar, Footer, etc.)
+- [ ] Public pages (Home, Book Detail, Cart, Checkout)
+- [ ] Authentication pages (Login, Register)
+- [ ] User pages (Profile, Order History)
+- [ ] Admin dashboard (Books, Orders, Users, Reports)
+
+### Phase 4: Integration & Testing
+- [ ] Frontend-Backend integration
+- [ ] User flow testing
+- [ ] Admin flow testing
+- [ ] Bug fixing
+- [ ] Performance optimization
+
+### Phase 5: Documentation & Presentation
+- [ ] Final report writing
+- [ ] Presentation slides preparation
+- [ ] Demo preparation
+- [ ] Self-assessment letters
 
 ## Timeline
 - **Assigned:** September 19, 2024
@@ -67,13 +117,25 @@ This project involves reengineering a web store from SE262 using a completely di
 
 ### Running Old Project (SE262)
 ```bash
-cd bookstore-project
+cd old-project/bookstore-project/backend
 npm install
-npm start
+# Setup MySQL database and .env file (see old-project/README.md)
+node server.js
 ```
 
+See [old-project/README.md](old-project/README.md) for detailed setup instructions.
+
 ### Running New Project (Coming Soon)
-Will be updated after implementation.
+Will be updated after implementation. See [new-project/README.md](new-project/README.md) for planned architecture.
+
+## Documentation
+
+### Available Documentation
+- 📘 **[Technology Survey](docs/technology-survey.md)** - Comprehensive comparison of all technology options
+- 📊 **[Comparison Tables](docs/comparison-tables.md)** - Quick reference scoring tables
+- 📝 **[Implementation Notes](docs/implementation-notes.md)** - Development progress tracking
+- 📂 **[Old Project Guide](old-project/README.md)** - Original SE262 project documentation
+- 🆕 **[New Project Guide](new-project/README.md)** - Reengineered project documentation
 
 ## Development Workflow
 

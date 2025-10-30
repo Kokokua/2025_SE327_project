@@ -17,6 +17,10 @@ export class UsersService {
     });
   }
 
+  async countAll(): Promise<number> {
+    return this.userRepository.count();
+  }
+
   async findById(id: number): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
